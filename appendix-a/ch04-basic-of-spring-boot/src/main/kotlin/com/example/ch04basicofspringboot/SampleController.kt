@@ -8,11 +8,12 @@ import org.springframework.web.bind.annotation.RestController
 
 // @RestController でエンドポイントになる
 @RestController
-class SampleController {
+class SampleController(val sampleService: SampleService) {
     // @GetMapping() で引数のパスに GET リクエストが送れるようになる
     @GetMapping("/")
     fun getPerson(): ResponseEntity<PersonResponse> {
-        return ResponseEntity(PersonResponse(Person(name = "Alice", age = 23)), HttpStatus.OK)
+        val result = sampleService.execute()
+        return ResponseEntity(PersonResponse(Person(name = result.person.name, age = result.person.age)), HttpStatus.OK)
     }
 }
 
