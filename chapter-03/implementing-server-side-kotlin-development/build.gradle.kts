@@ -20,6 +20,21 @@ plugins {
      * KotlinのLinter/Formatter
      */
     id("io.gitlab.arturbosch.detekt") version "1.21.0"
+    /**
+     * dokka
+     *
+     * URL
+     * - https://github.com/Kotlin/dokka
+     * GradlePlugins(plugins.gradle.org)
+     * - https://plugins.gradle.org/plugin/org.jetbrains.dokka
+     * Main用途
+     * - ドキュメント生成
+     * Sub用途
+     * - 特になし
+     * 概要
+     * - JDocの代替(=KDoc)
+     */
+    id("org.jetbrains.dokka") version "1.7.20"
 }
 
 group = "com.example"
@@ -45,6 +60,12 @@ dependencies {
      * - format自動適用オプションの autoCorrect が使えるようになる
      */
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
+    /**
+     * dokkaHtmlPlugin
+     *
+     * dokka Pluginを適用するのに必要
+     */
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.7.20")
 }
 
 tasks.withType<KotlinCompile> {
