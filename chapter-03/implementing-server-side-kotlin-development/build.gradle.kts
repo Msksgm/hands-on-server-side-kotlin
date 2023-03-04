@@ -81,6 +81,21 @@ dependencies {
      * - Kotlinで関数型プログラミングをするときに便利なライブラリ
      */
     implementation("io.arrow-kt:arrow-core:1.1.3")
+    /**
+     * AssertJ
+     *
+     * URL
+     * - https://assertj.github.io/doc/
+     * MavenCentral
+     * - https://mvnrepository.com/artifact/org.assertj/assertj-core
+     * Main用途
+     * - JUnitでassertThat(xxx).isEqualTo(yyy)みたいな感じで比較時に使う
+     * Sub用途
+     * - 特になし
+     * 概要
+     * - JUnit等を直感的に利用するためのライブラリ
+     */
+    testImplementation("org.assertj:assertj-core:3.23.1")
 }
 
 tasks.withType<KotlinCompile> {
