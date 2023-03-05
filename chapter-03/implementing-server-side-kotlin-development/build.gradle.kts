@@ -169,6 +169,21 @@ dependencies {
      * [Spring-Boot-2.3ではjavax.validationを依存関係に追加しなければならない](https://qiita.com/tatetsujitomorrow/items/a397c311a95d66e4f955)
      */
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    /**
+     * Spring JDBC
+     *
+     * URL
+     * - https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/core/package-summary.html
+     * MavenCentral
+     * - https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jdbc
+     * Main用途
+     * - DBへ保存
+     * 概要
+     * - 特になし
+     *
+     * これを入れるだけで、application.properties/yamlや@ConfigurationによるDB接続設定が必要になる
+     */
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
 }
 
 tasks.withType<KotlinCompile> {
