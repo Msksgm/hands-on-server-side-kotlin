@@ -83,6 +83,5 @@ class BodyTest {
             Arbitraries.strings()
                 .ofMinLength(0)
                 .ofMaxLength(1024)
-                .filter { !it.startsWith("diff-") }
     }
 }
