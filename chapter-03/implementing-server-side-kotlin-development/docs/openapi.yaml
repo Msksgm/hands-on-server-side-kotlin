@@ -1,0 +1,229 @@
+openapi: "3.0.2"
+info:
+  title: API Title
+  version: "1.0"
+servers:
+  - url: /api
+paths:
+  /articles:
+    post:
+      tags:
+        - Articles
+      summary: 記事作成
+      description: 記事を作成します。
+      operationId: CreateArticle
+      requestBody:
+        description: 新規作成記事
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewArticleRequest'
+        required: true
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleArticleResponse'
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+        '409':
+          description: Already Exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+    get:
+      tags:
+        - Articles
+      summary: 記事一覧取得
+      description: 全ての記事を取得します
+      operationId: GetArticles
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleArticleResponse'
+        '403':
+          description: ValidationError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+        '404':
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+  /articles/{slug}:
+    get:
+      tags:
+        - Articles
+      summary: 記事単一取得
+      description: 単一記事を取得します
+      operationId: GetArticle
+      parameters:
+        - name: slug
+          in: path
+          description: 記事の slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleArticleResponse'
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+    put:
+      tags:
+        - Articles
+      summary: 記事更新
+      description: 記事を更新します
+      operationId: UpdateArticle
+      parameters:
+        - name: slug
+          in: path
+          description: 記事の slug
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: 更新用の記事
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateArticleRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleArticleResponse'
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorModel'
+    delete:
+      tags:
+        - Articles
+      summary: 記事削除
+      description: 記事を削除します
+      operationId: DeleteArticle
+      parameters:
+        - name: slug
+          in: path
+          description: 記事の slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content: { }
+
+components:
+  schemas:
+    GenericErrorModel:
+      required:
+        - errors
+      type: object
+      properties:
+        errors:
+          required:
+            - body
+          type: object
+          properties:
+            body:
+              type: array
+              items:
+                type: string
+    Article:
+      required:
+        - slug
+        - body
+        - description
+        - title
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        body:
+          type: string
+    SingleArticleResponse:
+      required:
+        - article
+      type: object
+      properties:
+        article:
+          $ref: '#/components/schemas/Article'
+    MultipleArticleResponse:
+      required:
+        - articles
+      type: object
+      properties:
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Article'
+        articleCount:
+          type: integer
+    NewArticle:
+      required:
+        - body
+        - description
+        - title
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        body:
+          type: string
+    NewArticleRequest:
+      required:
+        - article
+      type: object
+      properties:
+        article:
+          $ref: '#/components/schemas/NewArticle'
+    UpdateArticle:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        body:
+          type: string
+    UpdateArticleRequest:
+      required:
+        - article
+      type: object
+      properties:
+        article:
+          $ref: '#/components/schemas/UpdateArticle'
