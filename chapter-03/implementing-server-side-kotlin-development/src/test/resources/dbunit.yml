@@ -1,0 +1,125 @@
+#
+# dbunit.yml
+#
+# 参考
+# - 大元
+#   - https://database-rider.github.io/database-rider/
+# - 1.32.3版のドキュメント
+#   - https://database-rider.github.io/database-rider/1.32.3/documentation.html#_dbunit_configuration
+# - サンプル
+#   - https://github.com/database-rider/database-rider/blob/master/rider-core/src/test/resources/config/sample-dbunit.yml
+#   - https://github.com/database-rider/database-rider#332-dbunit-configuration:
+#     - 説明付き
+#
+# 注: @DBUnitの方が優先される
+#
+
+#
+# cacheConnection
+# true: テスト間でコネクションが再利用される
+# default: true
+#
+cacheConnection: true
+
+#
+# cacheTableNames
+# true: テーブル名をキャッシュし、不必要なメタデータ接続を回避
+# default: true
+#
+cacheTableNames: true
+
+#
+# leakHunter
+# true: 接続リーク検出を有効化（テスト後にオープン状態のJDBC接続があれば検知）
+# default: false
+#
+leakHunter: false
+
+#
+# alwaysCleanBefore
+# true: @DataSet(cleanBefore)のデフォルトをtrueにする
+# default: false
+#
+alwaysCleanBefore: true
+
+#
+# alwaysCleanAfter
+# true: @DataSet(cleanAfter)のデフォルトをtrueにする
+# default: false
+#
+alwaysCleanAfter: false
+
+#
+# raiseExceptionOnCleanUp
+# true: cleanBefore/cleanAfterでcleanしようとしたら、例外を投げる
+# default: false
+#
+raiseExceptionOnCleanUp: true
+
+properties:
+  #
+  # properties.schema
+  # default: null
+  schema: public
+
+  #
+  # properties.batchedStatements
+  #
+  # true：JDBCバッチステートメントを使用できる
+  # default: false
+  #
+  batchedStatements:  false
+
+  #
+  # properties.qualifiedTableNames
+  # true：DBUnitはSCHEMA.TABLEで完全修飾された名前のテーブルにアクセスする
+  # false：複数のスキーマサポートを無効化
+  # default: false
+  #
+  qualifiedTableNames: false
+
+  #
+  # properties.caseSensitiveTableNames
+  # true：テーブル名の大文字・小文字を区別する
+  # default: false
+  #
+  caseSensitiveTableNames: true
+
+  #
+  # properties.batchSize
+  # 数値：JDBC一括更新のサイズ指定
+  # default: 100
+  #
+  batchSize: 100
+
+  #
+  # properties.fetchSize
+  # 数値：結果セットテーブルにデータをロードするためのfetchサイズの指定
+  # default: 100
+  #
+  fetchSize: 100
+
+  #
+  # properties.allowEmptyFields
+  # true：空文字でINSERT/UPDATEをcallできるようにする
+  # default: false
+  #
+  allowEmptyFields: true
+
+  #
+  # properties.escapePattern
+  # default: {}
+  #
+  #escapePattern:
+
+#
+# connectionConfig
+# JDBC接続設定
+# Entity Managerが接続をしてくれるなら別
+# default: 全て""
+#
+connectionConfig:
+  driver: "org.postgresql.Driver"
+  url: "jdbc:postgresql://127.0.0.1:5432/sample-db"
+  user: "sample-user"
+  password: "sample-pass"
