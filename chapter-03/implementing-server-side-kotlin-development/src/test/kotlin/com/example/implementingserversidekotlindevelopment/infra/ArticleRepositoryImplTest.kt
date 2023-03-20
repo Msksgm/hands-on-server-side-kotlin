@@ -1,6 +1,7 @@
 package com.example.implementingserversidekotlindevelopment.infra
 
 import arrow.core.Either
+import com.example.implementingserversidekotlindevelopment.domain.ArticleRepository
 import com.example.implementingserversidekotlindevelopment.domain.Body
 import com.example.implementingserversidekotlindevelopment.domain.CreatedArticle
 import com.example.implementingserversidekotlindevelopment.domain.Description
@@ -60,6 +61,39 @@ class ArticleRepositoryImplTest {
                     assertThat(actual.value.description).isEqualTo(expected.description)
                     assertThat(actual.value.body).isEqualTo(expected.body)
                 }
+            }
+        }
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-slug に該当する作成済記事が存在しない場合、FindBySlugError NotFound が戻り値`() {
+            /**
+             * given:
+             * - 作成済記事が存在しない slug 名
+             */
+            val slug = Slug.newWithoutValidation("dummy-slug-01")
+            val articleRepository = ArticleRepositoryImpl(DbConnection.namedParameterJdbcTemplate)
+
+            /**
+             * when:
+             */
+            val actual = articleRepository.findBySlug(slug = slug)
+
+            /**
+             * then:
+             */
+            val expected = ArticleRepository.FindBySlugError.NotFound(slug = slug)
+
+            when (actual) {
+                is Either.Left -> {
+                    assertThat(actual.value).isEqualTo(expected)
+                }
+
+                is Either.Right -> assert(false)
             }
         }
     }

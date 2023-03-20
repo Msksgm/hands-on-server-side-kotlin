@@ -1,6 +1,7 @@
 package com.example.implementingserversidekotlindevelopment.infra
 
 import arrow.core.Either
+import arrow.core.left
 import arrow.core.right
 import com.example.implementingserversidekotlindevelopment.domain.ArticleRepository
 import com.example.implementingserversidekotlindevelopment.domain.Body
@@ -38,7 +39,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
          * DB から作成済記事が見つからなかった場合、早期 return
          */
         if (articleMapList.isEmpty()) {
-            return TODO()
+            return ArticleRepository.FindBySlugError.NotFound(slug = slug).left()
         }
 
         val articleMap = articleMapList.first()
