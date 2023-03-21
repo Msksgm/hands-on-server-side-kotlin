@@ -4,7 +4,9 @@ import com.example.implementingserversidekotlindevelopment.openapi.generated.con
 import com.example.implementingserversidekotlindevelopment.openapi.generated.model.Article
 import com.example.implementingserversidekotlindevelopment.openapi.generated.model.GenericErrorModel
 import com.example.implementingserversidekotlindevelopment.openapi.generated.model.GenericErrorModelErrors
+import com.example.implementingserversidekotlindevelopment.openapi.generated.model.NewArticleRequest
 import com.example.implementingserversidekotlindevelopment.openapi.generated.model.SingleArticleResponse
+import com.example.implementingserversidekotlindevelopment.usecase.CreateArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.ShowArticleUseCase
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController
  * @property showArticleUseCase 単一記事取得ユースケース
  */
 @RestController
-class ArticleController(val showArticleUseCase: ShowArticleUseCase) : ArticlesApi {
+class ArticleController(
+    val showArticleUseCase: ShowArticleUseCase, val createdArticleUseCase: CreateArticleUseCase,
+) : ArticlesApi {
     override fun getArticle(slug: String): ResponseEntity<SingleArticleResponse> {
         /**
          * 作成済記事の取得
@@ -76,6 +80,65 @@ class ArticleController(val showArticleUseCase: ShowArticleUseCase) : ArticlesAp
              * 原因: バリデーションエラー
              */
             is ShowArticleUseCase.Error.ValidationErrors -> ResponseEntity<GenericErrorModel>(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = error.errors.map { it.message }
+                    )
+                ),
+                HttpStatus.FORBIDDEN
+            )
+        }
+
+    override fun createArticle(newArticleRequest: NewArticleRequest): ResponseEntity<SingleArticleResponse> {
+        /**
+         * 記事作成
+         */
+        val createdArticle = createdArticleUseCase.execute(
+            title = newArticleRequest.article.title,
+            description = newArticleRequest.article.description,
+            body = newArticleRequest.article.body,
+        ).fold(
+            { throw CreateArticleUseCaseErrorException(it) },
+            { it }
+        )
+
+        return ResponseEntity(
+            SingleArticleResponse(
+                article = Article(
+                    slug = createdArticle.slug.value,
+                    title = createdArticle.title.value,
+                    body = createdArticle.body.value,
+                    description = createdArticle.description.value,
+                ),
+            ),
+            HttpStatus.CREATED
+        )
+    }
+
+    /**
+     * 記事作成ユースケースがエラーを戻したときの Exception
+     *
+     * このクラスの例外が発生したときに、@ExceptionHandler で例外をおこなう
+     *
+     * @property error
+     */
+    data class CreateArticleUseCaseErrorException(val error: CreateArticleUseCase.Error) : Throwable()
+
+    /**
+     * CreateArticleUseCaseErrorException をハンドリングする関数
+     *
+     * CreateArticleUseCase.Error の型に合わせてレスポンスを分岐する
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = [CreateArticleUseCaseErrorException::class])
+    fun onCreateArticleUseCaseErrorException(e: CreateArticleUseCaseErrorException): ResponseEntity<GenericErrorModel> =
+        when (val error = e.error) {
+            /**
+             * 原因: 記事のリクエストが不正
+             */
+            is CreateArticleUseCase.Error.InvalidArticle -> ResponseEntity<GenericErrorModel>(
                 GenericErrorModel(
                     errors = GenericErrorModelErrors(
                         body = error.errors.map { it.message }
