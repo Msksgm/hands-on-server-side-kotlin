@@ -1,10 +1,10 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import java.util.stream.Stream
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
+import java.util.stream.Stream
 
 class CreatedArticleTest {
     data class TestCase(
