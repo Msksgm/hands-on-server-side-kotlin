@@ -1,5 +1,10 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
+import arrow.core.ValidatedNel
+import arrow.core.zip
+import arrow.typeclasses.Semigroup
+import com.example.implementingserversidekotlindevelopment.util.ValidationError
+
 /**
  * 作成済記事
  *
@@ -22,6 +27,18 @@ class CreatedArticle private constructor(
      * @constructor Create empty Companion
      */
     companion object {
+        /**
+         * Validation 有り、作成済記事を生成
+         *
+         * @param title
+         * @param description
+         * @param body
+         * @return
+         */
+        fun new(title: String?, description: String?, body: String?): Any {
+            TODO("Not yet implemented")
+        }
+
         /**
          * Validation 無し、作成済記事を生成
          *

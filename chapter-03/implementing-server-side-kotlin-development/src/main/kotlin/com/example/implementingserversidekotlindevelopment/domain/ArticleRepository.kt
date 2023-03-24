@@ -27,4 +27,20 @@ interface ArticleRepository {
          */
         data class NotFound(val slug: Slug) : FindBySlugError
     }
+
+    /**
+     * 作成済記事を保存
+     *
+     * @param createdArticle
+     * @return
+     */
+    fun create(
+        createdArticle: CreatedArticle,
+    ): Either<CreateArticleError, CreatedArticle> = throw NotImplementedError()
+
+    /**
+     * 作成済記事を保存したときのエラー
+     *
+     */
+    sealed interface CreateArticleError
 }
