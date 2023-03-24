@@ -11,7 +11,7 @@ comments:
   UndocumentedPublicClass:
     active: true  # (default: false)
   #
-  # UndocumentedPublicFunction
+  # UndocumentedPublicClass
   #
   # 概要
   # - コメントがないパブリックな関数を禁止する
@@ -19,7 +19,7 @@ comments:
   UndocumentedPublicFunction:
     active: true  # (default: false)
   #
-  # UndocumentedPublicProperty
+  # UndocumentedPublicClass
   #
   # 概要
   # - コメントがないパブリックなプロパティを禁止する
@@ -38,3 +38,56 @@ style:
   #
   UnusedImports:
     active: true  # (default: false)
+  #
+  # MaxLineLength
+  # 概要
+  # - 1 行あたりの最大文字数
+  #
+  MaxLineLength:
+    active: true
+    excludes: ['**/test/**'] # (default: なし）
+    maxLineLength: 120
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: false
+  #
+  # ReturnCount
+  # 概要
+  # - 関数あたりの return を記述可能な最大の数
+  #
+  ReturnCount:
+    active: true
+    max: 4 # (default: 2)
+    excludedFunctions: 'equals'
+    excludeLabeled: false
+    excludeReturnFromLambda: true
+    excludeGuardClauses: false
+  #
+  # ReturnCount
+  # 概要
+  # - 関数あたりの throw を記述可能な最大の数
+  #
+  ThrowsCount:
+    active: true
+    excludes: ['**/test/**'] # (default: なし）
+    max: 2
+    excludeGuardClauses: false
+
+# formatter のルール
+formatting:
+  active: true
+  android: false
+  autoCorrect: true
+  #
+  # MaximumLineLength
+  # 概要
+  # - 1 行あたりの最大文字数
+  # - style>MaxLineLength のwrapper
+  # - style>MaxLineLength を修正したとき、こちらも修正が必要
+  #
+  MaximumLineLength:
+    active: true
+    excludes: ['**/test/**'] # (default: なし）
+    maxLineLength: 120
+    ignoreBackTickedIdentifier: false
+
