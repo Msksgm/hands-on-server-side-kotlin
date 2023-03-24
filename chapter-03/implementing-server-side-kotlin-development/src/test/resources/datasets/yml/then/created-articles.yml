@@ -1,0 +1,6 @@
+articles:
+  - id: 10001
+    title: "dummy-title-01"
+    slug: "slug0000000000000000000000000001"
+    body: "dummy-body-01"
+    description: "dummy-description-01"

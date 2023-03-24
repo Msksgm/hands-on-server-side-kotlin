@@ -8,9 +8,11 @@ import com.example.implementingserversidekotlindevelopment.domain.Description
 import com.example.implementingserversidekotlindevelopment.domain.Slug
 import com.example.implementingserversidekotlindevelopment.domain.Title
 import com.github.database.rider.core.api.dataset.DataSet
+import com.github.database.rider.core.api.dataset.ExpectedDataSet
 import com.github.database.rider.junit5.api.DBRider
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -94,6 +96,70 @@ class ArticleRepositoryImplTest {
                 }
 
                 is Either.Right -> assert(false)
+            }
+        }
+    }
+
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @DBRider
+    class Create {
+        @BeforeEach
+        fun reset() = DbConnection.resetSequence()
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        @ExpectedDataSet(
+            value = ["datasets/yml/then/created-articles.yml"],
+            orderBy = ["id"],
+        )
+        // NOTE: @ExportDataSetはgivenの@DataSetが変更された時用に残しておく
+        // @ExportDataSet(
+        //     format = DataSetFormat.YML,
+        //     outputName = "src/test/resources/datasets/yml/then/created-articles.yml.yml",
+        //     includeTables = ["articles"]
+        // )
+        fun `正常系-作成済記事が保存される`() {
+            /**
+             * given
+             * - 保存する作成済記事
+             */
+            val unsavedCreatedArticle = CreatedArticle.newWithoutValidation(
+                slug = Slug.newWithoutValidation("slug0000000000000000000000000001"),
+                title = Title.newWithoutValidation("dummy-title-01"),
+                description = Description.newWithoutValidation("dummy-description-01"),
+                body = Body.newWithoutValidation("dummy-body-01")
+            )
+            val articleRepository = ArticleRepositoryImpl(DbConnection.namedParameterJdbcTemplate)
+
+            /**
+             * when:
+             */
+            val actual = articleRepository.create(createdArticle = unsavedCreatedArticle)
+
+            /**
+             * then:
+             * - 戻り値は引数と同じ
+             */
+            val expected = CreatedArticle.newWithoutValidation(
+                slug = Slug.newWithoutValidation("slug0000000000000000000000000001"),
+                title = Title.newWithoutValidation("dummy-title-01"),
+                description = Description.newWithoutValidation("dummy-description-01"),
+                body = Body.newWithoutValidation("dummy-body-01")
+            )
+            when (actual) {
+                is Either.Left -> assert(false) { "原因: ${actual.value}" }
+                is Either.Right -> {
+                    // CreatedArticle 同士を比較すると、slug が同一なだけでテストを通過するので、それ以外のプロパティも比較
+                    assertThat(actual.value.slug).isEqualTo(expected.slug)
+                    assertThat(actual.value.title).isEqualTo(expected.title)
+                    assertThat(actual.value.description).isEqualTo(expected.description)
+                    assertThat(actual.value.body).isEqualTo(expected.body)
+                }
             }
         }
     }
