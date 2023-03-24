@@ -2,7 +2,6 @@ package com.example.implementingserversidekotlindevelopment.domain
 
 import arrow.core.ValidatedNel
 import arrow.core.zip
-import arrow.typeclasses.Semigroup
 import com.example.implementingserversidekotlindevelopment.util.ValidationError
 
 /**
@@ -35,8 +34,15 @@ class CreatedArticle private constructor(
          * @param body
          * @return
          */
-        fun new(title: String?, description: String?, body: String?): Any {
-            TODO("Not yet implemented")
+        fun new(
+            title: String?,
+            description: String?,
+            body: String?,
+        ): ValidatedNel<ValidationError, CreatedArticle> {
+            return Title.new(title).zip(
+                Description.new(description),
+                Body.new(body)
+            ) { a, b, c -> CreatedArticle(Slug.new(), a, b, c) }
         }
 
         /**

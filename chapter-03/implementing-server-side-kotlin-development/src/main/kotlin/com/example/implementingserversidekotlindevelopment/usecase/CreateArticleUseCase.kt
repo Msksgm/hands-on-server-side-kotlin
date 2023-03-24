@@ -41,6 +41,7 @@ interface CreateArticleUseCase {
 /**
  * 作成済記事の作成ユースケース取得クラス
  *
+ * @property articleRepository
  */
 @Service
 class CreateArticleUseCaseImpl(
