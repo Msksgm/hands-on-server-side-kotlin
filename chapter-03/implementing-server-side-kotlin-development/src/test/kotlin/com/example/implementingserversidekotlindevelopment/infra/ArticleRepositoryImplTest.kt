@@ -8,6 +8,7 @@ import com.example.implementingserversidekotlindevelopment.domain.CreatedArticle
 import com.example.implementingserversidekotlindevelopment.domain.Description
 import com.example.implementingserversidekotlindevelopment.domain.Slug
 import com.example.implementingserversidekotlindevelopment.domain.Title
+import com.example.implementingserversidekotlindevelopment.domain.UpdatableCreatedArticle
 import com.github.database.rider.core.api.dataset.DataSet
 import com.github.database.rider.core.api.dataset.ExpectedDataSet
 import com.github.database.rider.junit5.api.DBRider
@@ -243,6 +244,130 @@ class ArticleRepositoryImplTest {
                         assertThat(actualArticle.description).isEqualTo(expectedArticle.description)
                     }
                 }
+            }
+        }
+    }
+
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @DBRider
+    class Update {
+        @BeforeEach
+        fun reset() = DbConnection.resetSequence()
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/articles.yml"
+            ]
+        )
+        @ExpectedDataSet(
+            value = ["datasets/yml/then/updated-articles.yml"],
+            orderBy = ["id"],
+        )
+        // NOTE: @ExportDataSetはgivenの@DataSetが変更された時用に残しておく
+        // @ExportDataSet(
+        //     format = DataSetFormat.YML,
+        //     outputName = "src/test/resources/datasets/yml/then/updated-articles.yml",
+        //     includeTables = ["articles"]
+        // )
+        fun `正常系-slug に該当する作成済記事が存在する場合、単一の作成済記事が戻り値`() {
+            /**
+             * given
+             * - 作成済記事が存在する slug 名
+             * - 更新用の作成済記事
+             */
+            val slug = Slug.new("slug0000000000000000000000000001").fold(
+                { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                { it }
+            )
+            val updatableCreatedArticle = UpdatableCreatedArticle.new(
+                title = "updated-dummy-title-01",
+                description = "updated-dummy-description-01",
+                body = "updated-dummy-body-01"
+            ).fold(
+                { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                { it }
+            )
+            val articleRepository = ArticleRepositoryImpl(DbConnection.namedParameterJdbcTemplate)
+
+            /**
+             * when:
+             */
+            val actual = articleRepository.update(slug = slug, updatableCreatedArticle = updatableCreatedArticle)
+
+            /**
+             * then:
+             * - 引数で渡したパラメーターが作成済記事になる
+             */
+            val expected = CreatedArticle.newWithoutValidation(
+                slug = slug,
+                title = Title.new("updated-dummy-title-01").fold(
+                    { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                    { it }
+                ),
+                description = Description.new("updated-dummy-description-01").fold(
+                    { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                    { it }
+                ),
+                body = Body.new("updated-dummy-body-01").fold(
+                    { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                    { it }
+                ),
+            )
+            when (actual) {
+                is Either.Left -> assert(false) { "原因: ${actual.value}" }
+                is Either.Right -> {
+                    // CreatedArticle 同士を比較すると、slug が同一なだけでテストを通過するので、それ以外のプロパティも比較
+                    assertThat(actual.value.slug).isEqualTo(expected.slug)
+                    assertThat(actual.value.title).isEqualTo(expected.title)
+                    assertThat(actual.value.description).isEqualTo(expected.description)
+                    assertThat(actual.value.body).isEqualTo(expected.body)
+                }
+            }
+        }
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-slug に該当する作成済記事が存在しない場合、NotFoundError が戻り値`() {
+            /**
+             * given
+             * - 作成済記事が存在しない slug 名
+             */
+            val slug = Slug.new("slug9999999999999999999999999999").fold(
+                { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                { it }
+            )
+            val updatableCreatedArticle = UpdatableCreatedArticle.new(
+                title = "updated-dummy-title-01",
+                description = "updated-dummy-description-01",
+                body = "updated-dummy-body-01"
+            ).fold(
+                { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                { it }
+            )
+            val articleRepository = ArticleRepositoryImpl(DbConnection.namedParameterJdbcTemplate)
+
+            /**
+             * when:
+             */
+            val actual = articleRepository.update(slug = slug, updatableCreatedArticle = updatableCreatedArticle)
+
+            /**
+             * then:
+             * - 「slug に該当する作成済記事が存在しません」エラー
+             */
+            val expected = ArticleRepository.UpdateError.NotFound(slug = slug)
+            when (actual) {
+                is Either.Left -> {
+                    assertThat(actual.value).isEqualTo(expected)
+                }
+
+                is Either.Right -> assert(false)
             }
         }
     }

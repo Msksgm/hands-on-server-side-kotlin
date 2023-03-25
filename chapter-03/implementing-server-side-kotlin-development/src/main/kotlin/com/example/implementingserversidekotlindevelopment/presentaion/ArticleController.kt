@@ -7,9 +7,11 @@ import com.example.implementingserversidekotlindevelopment.openapi.generated.mod
 import com.example.implementingserversidekotlindevelopment.openapi.generated.model.MultipleArticleResponse
 import com.example.implementingserversidekotlindevelopment.openapi.generated.model.NewArticleRequest
 import com.example.implementingserversidekotlindevelopment.openapi.generated.model.SingleArticleResponse
+import com.example.implementingserversidekotlindevelopment.openapi.generated.model.UpdateArticleRequest
 import com.example.implementingserversidekotlindevelopment.usecase.CreateArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.FeedArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.ShowArticleUseCase
+import com.example.implementingserversidekotlindevelopment.usecase.UpdateArticleUseCase
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -20,13 +22,15 @@ import org.springframework.web.bind.annotation.RestController
  *
  * @property showArticleUseCase 単一記事取得ユースケース
  * @property createdArticleUseCase 記事作成ユースケース
- * @property feedArticleUseCase
+ * @property feedArticleUseCase 記事一覧取得ユースケース
+ * @property updateArticleUseCase 記事更新ユースーケース
  */
 @RestController
 class ArticleController(
     val showArticleUseCase: ShowArticleUseCase,
     val createdArticleUseCase: CreateArticleUseCase,
     val feedArticleUseCase: FeedArticleUseCase,
+    val updateArticleUseCase: UpdateArticleUseCase,
 ) : ArticlesApi {
     override fun getArticle(slug: String): ResponseEntity<SingleArticleResponse> {
         /**
@@ -174,4 +178,76 @@ class ArticleController(
             HttpStatus.OK
         )
     }
+
+    override fun updateArticle(
+        slug: String,
+        updateArticleRequest: UpdateArticleRequest,
+    ): ResponseEntity<SingleArticleResponse> {
+        val updatedArticle = updateArticleUseCase.execute(
+            slug = slug,
+            title = updateArticleRequest.article.title,
+            description = updateArticleRequest.article.description,
+            body = updateArticleRequest.article.body
+        ).fold({ throw UpdateArticleUseCaseErrorException(it) }, { it })
+
+        return ResponseEntity(
+            SingleArticleResponse(
+                article = Article(
+                    slug = updatedArticle.slug.value,
+                    title = updatedArticle.title.value,
+                    description = updatedArticle.description.value,
+                    body = updatedArticle.body.value,
+                ),
+            ),
+            HttpStatus.OK
+        )
+    }
+
+    /**
+     * 記事更新ユースケースがエラーを戻したときの Exception
+     *
+     * このクラスの例外が発生したときに、@ExceptionHandler で例外をおこなう
+     *
+     * @property error
+     */
+    data class UpdateArticleUseCaseErrorException(val error: UpdateArticleUseCase.Error) : Throwable()
+
+    /**
+     * UpdateArticleUseCaseErrorException をハンドリングする関数
+     *
+     * UpdateArticleUseCase.Error の型に合わせてレスポンスを分岐する
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = [UpdateArticleUseCaseErrorException::class])
+    fun onUpdateArticleUseCaseErrorException(e: UpdateArticleUseCaseErrorException): ResponseEntity<GenericErrorModel> =
+        when (val error = e.error) {
+            is UpdateArticleUseCase.Error.NotFoundArticleBySlug -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = listOf("${error.slug.value} に該当する記事は見つかりませんでした")
+                    )
+                ),
+                HttpStatus.NOT_FOUND
+            )
+
+            is UpdateArticleUseCase.Error.InvalidArticle -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = error.errors.map { it.message }
+                    )
+                ),
+                HttpStatus.FORBIDDEN
+            )
+
+            is UpdateArticleUseCase.Error.ValidationErrors -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = error.errors.map { it.message }
+                    )
+                ),
+                HttpStatus.FORBIDDEN
+            )
+        }
 }
