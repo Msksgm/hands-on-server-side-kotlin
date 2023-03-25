@@ -236,7 +236,62 @@ class ArticleTest {
                     }
                 )
             )
+        }
 
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-バリデーションエラー`() {
+            /**
+             * given:
+             * - title が空
+             * - description が 64 文字超過
+             */
+            val responseBody = """
+                {
+                  "article": {
+                    "title": "",
+                    "description": "01234567890123456789012345678901234567890123456789012345678901234",
+                    "body": ""
+                  }
+                }
+            """.trimIndent()
+
+            /**
+             * when:
+             */
+            val response = mockMvc.post("/api/articles") {
+                contentType = MediaType.APPLICATION_JSON
+                content = responseBody
+            }.andReturn().response
+            val actualStatus = response.status
+            val actualResponseBody = response.contentAsString
+
+            /**
+             * then:
+             * - ステータスコードが一致する
+             * - レスポンスボディが一致する
+             */
+            val expectedStatus = HttpStatus.FORBIDDEN.value()
+            val expectedResponseBody = """
+                {
+                  "errors": {
+                    "body": [
+                      "title は必須です",
+                      "description は 64 文字以下にしてください"
+                    ]
+                  }
+                }
+            """.trimIndent()
+            assertThat(actualStatus).isEqualTo(expectedStatus)
+            JSONAssert.assertEquals(
+                expectedResponseBody,
+                actualResponseBody,
+                JSONCompareMode.STRICT,
+            )
         }
     }
 }
