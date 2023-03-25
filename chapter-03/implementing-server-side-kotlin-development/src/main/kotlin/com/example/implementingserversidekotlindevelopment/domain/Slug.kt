@@ -104,7 +104,7 @@ interface Slug {
          */
         data class ValidFormat(val slug: String) : CreationError {
             override val message: String
-                get() = "slug は32文字の英小文字数字です。"
+                get() = "slug は 32 文字の英小文字数字です。"
         }
     }
 }
