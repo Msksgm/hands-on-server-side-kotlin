@@ -57,4 +57,27 @@ interface ArticleRepository {
      * エラーになるパターンが存在しない
      */
     sealed interface FindError
+
+    /**
+     * 作成記事の更新
+     *
+     * @param slug
+     * @param updatableCreatedArticle
+     * @return
+     */
+    fun update(slug: Slug, updatableCreatedArticle: UpdatableCreatedArticle): Either<UpdateError, CreatedArticle> =
+        throw NotImplementedError()
+
+    /**
+     * ArticleRepository.update のエラーインタフェース
+     *
+     */
+    sealed interface UpdateError {
+        /**
+         * slug に該当する記事が見つからなかった
+         *
+         * @property slug
+         */
+        data class NotFound(val slug: Slug) : UpdateError
+    }
 }
