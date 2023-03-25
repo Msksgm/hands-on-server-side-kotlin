@@ -294,4 +294,108 @@ class ArticleTest {
             )
         }
     }
+
+    @SpringBootTest
+    @AutoConfigureMockMvc
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @DBRider
+    class GetArticles(
+        @Autowired val mockMvc: MockMvc,
+    ) {
+        @BeforeEach
+        fun reset() = DbConnection.resetSequence()
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/articles.yml"
+            ]
+        )
+        fun `正常系-DB 内に存在する全ての記事を取得する`() {
+            /**
+             * given:
+             */
+
+            /**
+             * when:
+             */
+            val response = mockMvc.get("/api/articles") {
+                contentType = MediaType.APPLICATION_JSON
+            }.andReturn().response
+            val actualStatus = response.status
+            val actualResponseBody = response.contentAsString
+
+            /**
+             * then:
+             * - ステータスコードが一致する
+             * - レスポンスボディが一致する
+             */
+            val expectedStatus = 200
+            val expectedResponseBody = """
+                 {
+                  articleCount: 2,
+                  articles: [
+                    {
+                      slug: "slug0000000000000000000000000001",
+                      title: "dummy-title-01",
+                      description: "dummy-description-01",
+                      body:"dummy-body-01"
+                    },
+                    {
+                      slug: "slug0000000000000000000000000002",
+                      title: "dummy-title-02",
+                      description: "dummy-description-02",
+                      body: "dummy-body-02"
+                    }
+                  ]
+                }
+            """.trimIndent()
+            assertThat(actualStatus).isEqualTo(expectedStatus)
+            JSONAssert.assertEquals(
+                expectedResponseBody,
+                actualResponseBody,
+                JSONCompareMode.NON_EXTENSIBLE
+            )
+        }
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `正常系-DB 内に記事が存在しない場合、空で取得する`() {
+            /**
+             * given:
+             */
+
+            /**
+             * when:
+             */
+            val response = mockMvc.get("/api/articles") {
+                contentType = MediaType.APPLICATION_JSON
+            }.andReturn().response
+            val actualStatus = response.status
+            val actualResponseBody = response.contentAsString
+
+            /**
+             * then:
+             * - ステータスコードが一致する
+             * - レスポンスボディが一致する
+             */
+            val expectedStatus = 200
+            val expectedResponseBody = """
+                {
+                  articleCount: 0,
+                  articles: []
+                }
+            """.trimIndent()
+            assertThat(actualStatus).isEqualTo(expectedStatus)
+            JSONAssert.assertEquals(
+                expectedResponseBody,
+                actualResponseBody,
+                JSONCompareMode.NON_EXTENSIBLE
+            )
+        }
+    }
 }
