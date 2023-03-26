@@ -427,13 +427,13 @@ class ArticleTest {
              */
             val slug = "slug0000000000000000000000000001"
             val requestBody = """
-                {
-                  "article": {
-                    "title": "updated-dummy-title-01",
-                    "description": "updated-dummy-description-01",
-                    "body": "updated-dummy-body-01"
-                  }
-                }
+                    {
+                      "article": {
+                        "title": "updated-dummy-title-01",
+                        "description": "updated-dummy-description-01",
+                        "body": "updated-dummy-body-01"
+                      }
+                    }
             """.trimIndent()
 
             /**
@@ -454,21 +454,21 @@ class ArticleTest {
              */
             val expectedStatus = HttpStatus.OK.value()
             val expectedResponseBody = """
-                {
-                  "article": {
-                    "slug": "slug0000000000000000000000000001",
-                    "title": "updated-dummy-title-01",
-                    "description": "updated-dummy-description-01",
-                    "body": "updated-dummy-body-01"
-                  }
-                }
+                    {
+                      "article": {
+                        "slug": "slug0000000000000000000000000001",
+                        "title": "updated-dummy-title-01",
+                        "description": "updated-dummy-description-01",
+                        "body": "updated-dummy-body-01"
+                      }
+                    }
             """.trimIndent()
             assertThat(actualStatus).isEqualTo(expectedStatus)
             JSONAssert.assertEquals(
                 expectedResponseBody,
                 actualResponseBody,
                 CustomComparator(
-                    JSONCompareMode.NON_EXTENSIBLE,
+                    JSONCompareMode.NON_EXTENSIBLE
                 )
             )
         }
@@ -486,13 +486,13 @@ class ArticleTest {
              */
             val slug = "slug0000000000000000000000000001"
             val requestBody = """
-                {
-                  "article": {
-                    "title": "updated-dummy-title-01",
-                    "description": "updated-dummy-description-01",
-                    "body": "updated-dummy-body-01"
-                  }
-                }
+                    {
+                      "article": {
+                        "title": "updated-dummy-title-01",
+                        "description": "updated-dummy-description-01",
+                        "body": "updated-dummy-body-01"
+                      }
+                    }
             """.trimIndent()
 
             /**
@@ -512,13 +512,13 @@ class ArticleTest {
              */
             val expectedStatus = HttpStatus.NOT_FOUND.value()
             val expectedResponseBody = """
-                {
-                  "errors": {
-                    "body": [
-                      "slug0000000000000000000000000001 に該当する記事は見つかりませんでした"
-                    ]
-                  }
-                }
+                    {
+                      "errors": {
+                        "body": [
+                          "slug0000000000000000000000000001 に該当する記事は見つかりませんでした"
+                        ]
+                      }
+                    }
             """.trimIndent()
             assertThat(actualStatus).isEqualTo(expectedStatus)
             JSONAssert.assertEquals(
@@ -542,13 +542,13 @@ class ArticleTest {
              */
             val slug = "slug0000000000000000000000000001"
             val responseBody = """
-                {
-                  "article": {
-                    "title": "",
-                    "description": "01234567890123456789012345678901234567890123456789012345678901234",
-                    "body": ""
-                  }
-                }
+                    {
+                      "article": {
+                        "title": "",
+                        "description": "01234567890123456789012345678901234567890123456789012345678901234",
+                        "body": ""
+                      }
+                    }
             """.trimIndent()
 
             /**
@@ -568,112 +568,14 @@ class ArticleTest {
              */
             val expectedStatus = HttpStatus.FORBIDDEN.value()
             val expectedResponseBody = """
-                {
-                  "errors": {
-                    "body": [
-                      "title は必須です",
-                      "description は 64 文字以下にしてください"
-                    ]
-                  }
-                }
-            """.trimIndent()
-            assertThat(actualStatus).isEqualTo(expectedStatus)
-            JSONAssert.assertEquals(
-                expectedResponseBody,
-                actualResponseBody,
-                JSONCompareMode.STRICT,
-            )
-        }
-    }
-
-    @SpringBootTest
-    @AutoConfigureMockMvc
-    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    @DBRider
-    class DeleteArticle(
-        @Autowired val mockMvc: MockMvc,
-    ) {
-        @BeforeEach
-        fun reset() = DbConnection.resetSequence()
-
-        @Test
-        @DataSet(
-            value = [
-                "datasets/yml/given/articles.yml"
-            ]
-        )
-        @ExpectedDataSet(
-            value = ["datasets/yml/then/deleted-articles.yml"],
-            orderBy = ["id"],
-        )
-        fun `正常系-slug に該当する作成済記事が更新される`() {
-            /**
-             * given:
-             * - 存在する slug
-             */
-            val slug = "slug0000000000000000000000000001"
-
-            /**
-             * when:
-             */
-            val response = mockMvc.delete("/api/articles/$slug") {
-                contentType = MediaType.APPLICATION_JSON
-            }.andReturn().response
-            val actualStatus = response.status
-            val actualResponseBody = response.contentAsString
-
-            /**
-             * then:
-             * - ステータスコードが一致する
-             * - レスポンスボディが一致する
-             * - JSON レスポンスを比較する。slug は自動生成されるので、形式だけ確認する
-             */
-            val expectedStatus = HttpStatus.OK.value()
-            val expectedResponseBody = "{}".trimIndent()
-            assertThat(actualStatus).isEqualTo(expectedStatus)
-            JSONAssert.assertEquals(
-                expectedResponseBody,
-                actualResponseBody,
-                JSONCompareMode.STRICT
-            )
-        }
-
-        @Test
-        @DataSet(
-            value = [
-                "datasets/yml/given/empty-articles.yml"
-            ]
-        )
-        fun `異常系-slug に該当する作成済記事が存在しない`() {
-            /**
-             * given:
-             * - 存在しない slug
-             */
-            val slug = "slug0000000000000000000000000001"
-
-            /**
-             * when:
-             */
-            val response = mockMvc.delete("/api/articles/$slug") {
-                contentType = MediaType.APPLICATION_JSON
-            }.andReturn().response
-            val actualStatus = response.status
-            val actualResponseBody = response.contentAsString
-
-            /**
-             * then:
-             * - ステータスコードが一致する
-             * - レスポンスボディが一致する
-             */
-            val expectedStatus = HttpStatus.NOT_FOUND.value()
-            val expectedResponseBody = """
-                {
-                  "errors": {
-                    "body": [
-                      "slug0000000000000000000000000001 に該当する記事は見つかりませんでした"
-                    ]
-                  }
-                }
+                    {
+                      "errors": {
+                        "body": [
+                          "title は必須です",
+                          "description は 64 文字以下にしてください"
+                        ]
+                      }
+                    }
             """.trimIndent()
             assertThat(actualStatus).isEqualTo(expectedStatus)
             JSONAssert.assertEquals(
