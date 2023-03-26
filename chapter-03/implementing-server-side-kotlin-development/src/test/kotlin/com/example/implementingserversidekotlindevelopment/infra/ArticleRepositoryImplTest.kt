@@ -371,4 +371,95 @@ class ArticleRepositoryImplTest {
             }
         }
     }
+
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @DBRider
+    class Delete {
+        @BeforeEach
+        fun reset() = DbConnection.resetSequence()
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/articles.yml"
+            ]
+        )
+        @ExpectedDataSet(
+            value = ["datasets/yml/then/deleted-articles.yml"],
+            orderBy = ["id"],
+        )
+        // NOTE: @ExportDataSetはgivenの@DataSetが変更された時用に残しておく
+        // @ExportDataSet(
+        //     format = DataSetFormat.YML,
+        //     outputName = "src/test/resources/datasets/yml/then/delete-articles.yml",
+        //     includeTables = ["articles"]
+        // )
+        fun `正常系-slug に該当する作成済記事が存在する場合、Unit 型が戻り値`() {
+            /**
+             * given
+             * - 作成済記事が存在する slug 名
+             */
+            val slug = Slug.new("slug0000000000000000000000000001").fold(
+                { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                { it }
+            )
+
+            val articleRepository = ArticleRepositoryImpl(DbConnection.namedParameterJdbcTemplate)
+
+            /**
+             * when:
+             */
+            val actual = articleRepository.delete(slug)
+
+            /**
+             * then:
+             * - 引数で渡したパラメーターが作成済記事になる
+             */
+            val expected = Unit
+            when (actual) {
+                is Either.Left -> assert(false) { "原因: ${actual.value}" }
+                is Either.Right -> {
+                    // CreatedArticle 同士を比較すると、slug が同一なだけでテストを通過するので、それ以外のプロパティも比較
+                    assertThat(actual.value).isEqualTo(expected)
+                }
+            }
+        }
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-slug に該当する作成済記事が存在しない場合、NotFoundError が戻り値`() {
+            /**
+             * given
+             * - 作成済記事が存在しない slug 名
+             */
+            val slug = Slug.new("slug9999999999999999999999999999").fold(
+                { throw UnsupportedOperationException("予期していないエラーです。実装を確認してください。") },
+                { it }
+            )
+            val articleRepository = ArticleRepositoryImpl(DbConnection.namedParameterJdbcTemplate)
+
+            /**
+             * when:
+             */
+            val actual = articleRepository.delete(slug = slug)
+
+            /**
+             * then:
+             * - 「slug に該当する作成済記事が存在しません」エラー
+             */
+            val expected = ArticleRepository.DeleteError.NotFound(slug = slug)
+            when (actual) {
+                is Either.Left -> {
+                    assertThat(actual.value).isEqualTo(expected)
+                }
+
+                is Either.Right -> assert(false)
+            }
+        }
+    }
 }

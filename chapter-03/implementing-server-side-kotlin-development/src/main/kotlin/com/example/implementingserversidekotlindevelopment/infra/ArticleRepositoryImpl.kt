@@ -160,4 +160,50 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
             description = updatableCreatedArticle.description
         ).right()
     }
+
+    override fun delete(slug: Slug): Either<ArticleRepository.DeleteError, Unit> {
+        /**
+         * slug に該当する作成済記事を調べる
+         */
+        val findArticleSql = """
+            SELECT
+                articles.slug
+                , articles.title
+                , articles.body
+                , articles.description
+            FROM
+                articles
+            WHERE
+                slug = :slug
+        """.trimIndent()
+        val articleMapList =
+            namedParameterJdbcTemplate.queryForList(
+                findArticleSql,
+                MapSqlParameterSource().addValue("slug", slug.value)
+            )
+
+        /**
+         * DB から作成済記事が見つからなかった場合、早期 return
+         */
+        if (articleMapList.isEmpty()) {
+            return ArticleRepository.DeleteError.NotFound(slug = slug).left()
+        }
+
+        /**
+         * 記事を削除
+         */
+        val sql = """
+            DELETE FROM
+                articles
+            WHERE
+                slug = :slug
+        """.trimIndent()
+        namedParameterJdbcTemplate.update(
+            sql,
+            MapSqlParameterSource()
+                .addValue("slug", slug.value)
+        )
+
+        return Unit.right()
+    }
 }
