@@ -49,7 +49,7 @@ interface UpdatableCreatedArticle {
         fun new(
             title: String?,
             description: String?,
-            body: String?,
+            body: String?
         ): ValidatedNel<ValidationError, UpdatableCreatedArticle> {
             return Title.new(title).zip(
                 Description.new(description),
