@@ -103,10 +103,10 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
 
     override fun update(
         slug: Slug,
-        updatableCreatedArticle: UpdatableCreatedArticle,
+        updatableCreatedArticle: UpdatableCreatedArticle
     ): Either<ArticleRepository.UpdateError, CreatedArticle> {
         /**
-         * slug に該当する作成済記事を調べる
+         * slug に該当する作成済み記事を調べる
          */
         val findArticleSql = """
             SELECT
@@ -116,8 +116,9 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
                 , articles.description
             FROM
                 articles
-            WHERE
+            WHERE 
                 slug = :slug
+            ;
         """.trimIndent()
         val articleMapList =
             namedParameterJdbcTemplate.queryForList(
@@ -126,7 +127,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
             )
 
         /**
-         * DB から作成済記事が見つからなかった場合、早期 return
+         * DB から作成済み記事が見つからなかった場合、早期 return
          */
         if (articleMapList.isEmpty()) {
             return ArticleRepository.UpdateError.NotFound(slug = slug).left()
@@ -144,6 +145,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
                 , description = :description
             WHERE
                 slug = :slug
+            ;
         """.trimIndent()
         namedParameterJdbcTemplate.update(
             sql,
@@ -157,53 +159,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
             slug = slug,
             title = updatableCreatedArticle.title,
             body = updatableCreatedArticle.body,
-            description = updatableCreatedArticle.description
+            description = updatableCreatedArticle.description,
         ).right()
-    }
-
-    override fun delete(slug: Slug): Either<ArticleRepository.DeleteError, Unit> {
-        /**
-         * slug に該当する作成済記事を調べる
-         */
-        val findArticleSql = """
-            SELECT
-                articles.slug
-                , articles.title
-                , articles.body
-                , articles.description
-            FROM
-                articles
-            WHERE
-                slug = :slug
-        """.trimIndent()
-        val articleMapList =
-            namedParameterJdbcTemplate.queryForList(
-                findArticleSql,
-                MapSqlParameterSource().addValue("slug", slug.value)
-            )
-
-        /**
-         * DB から作成済記事が見つからなかった場合、早期 return
-         */
-        if (articleMapList.isEmpty()) {
-            return ArticleRepository.DeleteError.NotFound(slug = slug).left()
-        }
-
-        /**
-         * 記事を削除
-         */
-        val sql = """
-            DELETE FROM
-                articles
-            WHERE
-                slug = :slug
-        """.trimIndent()
-        namedParameterJdbcTemplate.update(
-            sql,
-            MapSqlParameterSource()
-                .addValue("slug", slug.value)
-        )
-
-        return Unit.right()
     }
 }
