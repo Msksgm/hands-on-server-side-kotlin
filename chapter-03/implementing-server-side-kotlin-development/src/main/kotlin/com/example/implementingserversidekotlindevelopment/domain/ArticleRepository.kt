@@ -80,4 +80,25 @@ interface ArticleRepository {
          */
         data class NotFound(val slug: Slug) : UpdateError
     }
+
+    /**
+     * 作成済記事の削除
+     *
+     * @param slug
+     * @return
+     */
+    fun delete(slug: Slug): Either<DeleteError, Unit> = throw NotImplementedError()
+
+    /**
+     * ArticleRepository.delete のエラーインタフェース
+     *
+     */
+    sealed interface DeleteError {
+        /**
+         * 記事が見つからなかった
+         *
+         * @property slug
+         */
+        data class NotFound(val slug: Slug) : DeleteError
+    }
 }
