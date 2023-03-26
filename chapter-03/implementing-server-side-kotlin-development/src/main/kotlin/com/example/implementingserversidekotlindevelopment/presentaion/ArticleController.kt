@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController
  * @property createdArticleUseCase 記事作成ユースケース
  * @property feedArticleUseCase 記事一覧取得ユースケース
  * @property updateArticleUseCase 記事更新ユースーケース
+ * @property deleteCreatedArticleUseCase 記事削除ユースケース
  */
 @RestController
 class ArticleController(
@@ -33,6 +34,7 @@ class ArticleController(
     val createdArticleUseCase: CreateArticleUseCase,
     val feedArticleUseCase: FeedArticleUseCase,
     val updateArticleUseCase: UpdateArticleUseCase,
+    val deleteCreatedArticleUseCase: DeleteCreatedArticleUseCase,
 ) : ArticlesApi {
     override fun getArticle(slug: String): ResponseEntity<SingleArticleResponse> {
         /**
@@ -244,6 +246,53 @@ class ArticleController(
             )
 
             is UpdateArticleUseCase.Error.ValidationErrors -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = error.errors.map { it.message }
+                    )
+                ),
+                HttpStatus.FORBIDDEN
+            )
+        }
+
+    override fun deleteArticle(slug: String): ResponseEntity<Unit> {
+        deleteCreatedArticleUseCase.execute(
+            slug = slug
+        ).handleError { throw DeleteArticleUseCaseErrorException(it) }
+
+        return ResponseEntity(Unit, HttpStatus.OK)
+    }
+
+    /**
+     * 記事削除ユースケースがエラーを戻したときの Exception
+     *
+     * このクラスの例外が発生したときに、@ExceptionHandler で例外をおこなう
+     *
+     * @property error
+     */
+    data class DeleteArticleUseCaseErrorException(val error: DeleteCreatedArticleUseCase.Error) : Exception()
+
+    /**
+     * DeleteArticleUseCaseErrorException をハンドリングする関数
+     *
+     * DeleteArticleUseCase.Error の型に合わせてレスポンスを分岐する
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = [DeleteArticleUseCaseErrorException::class])
+    fun onDeleteArticleUseCaseErrorException(e: DeleteArticleUseCaseErrorException): ResponseEntity<GenericErrorModel> =
+        when (val error = e.error) {
+            is DeleteCreatedArticleUseCase.Error.NotFoundArticleBySlug -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = listOf("${error.slug.value} に該当する記事は見つかりませんでした")
+                    )
+                ),
+                HttpStatus.NOT_FOUND
+            )
+
+            is DeleteCreatedArticleUseCase.Error.ValidationErrors -> ResponseEntity(
                 GenericErrorModel(
                     errors = GenericErrorModelErrors(
                         body = error.errors.map { it.message }
