@@ -165,7 +165,7 @@ class ArticleRepositoryImplTest {
 
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @DBRider
-    class Find {
+    class All {
         @BeforeAll
         fun reset() = DbConnection.resetSequence()
 
@@ -184,7 +184,7 @@ class ArticleRepositoryImplTest {
             /**
              * when:
              */
-            val actual = articleRepository.find()
+            val actual = articleRepository.all()
 
             /**
              * then:
@@ -208,7 +208,7 @@ class ArticleRepositoryImplTest {
             /**
              * when:
              */
-            val actual = articleRepository.find()
+            val actual = articleRepository.all()
 
             /**
              * then:
