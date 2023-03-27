@@ -232,7 +232,7 @@ class ArticleTest {
                 expectedResponseBody,
                 actualResponseBody,
                 CustomComparator(
-                    JSONCompareMode.NON_EXTENSIBLE,
+                    JSONCompareMode.STRICT,
                     Customization("article.slug") { actualSlug, _ ->
                         actualSlug.toString().matches(Regex("^[a-z0-9]{32}\$"))
                     }
@@ -292,7 +292,7 @@ class ArticleTest {
             JSONAssert.assertEquals(
                 expectedResponseBody,
                 actualResponseBody,
-                JSONCompareMode.STRICT,
+                JSONCompareMode.NON_EXTENSIBLE,
             )
         }
     }
@@ -468,7 +468,7 @@ class ArticleTest {
                 expectedResponseBody,
                 actualResponseBody,
                 CustomComparator(
-                    JSONCompareMode.NON_EXTENSIBLE,
+                    JSONCompareMode.STRICT,
                 )
             )
         }
@@ -524,7 +524,7 @@ class ArticleTest {
             JSONAssert.assertEquals(
                 expectedResponseBody,
                 actualResponseBody,
-                JSONCompareMode.STRICT,
+                JSONCompareMode.NON_EXTENSIBLE,
             )
         }
 
@@ -581,7 +581,7 @@ class ArticleTest {
             JSONAssert.assertEquals(
                 expectedResponseBody,
                 actualResponseBody,
-                JSONCompareMode.STRICT,
+                JSONCompareMode.NON_EXTENSIBLE,
             )
         }
     }
@@ -679,7 +679,7 @@ class ArticleTest {
             JSONAssert.assertEquals(
                 expectedResponseBody,
                 actualResponseBody,
-                JSONCompareMode.STRICT,
+                JSONCompareMode.NON_EXTENSIBLE,
             )
         }
     }
