@@ -15,12 +15,10 @@ import com.github.database.rider.junit5.api.DBRider
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 class ArticleRepositoryImplTest {
-    @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @DBRider
     class FindBySlug {
@@ -102,7 +100,6 @@ class ArticleRepositoryImplTest {
         }
     }
 
-    @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @DBRider
     class Create {
@@ -166,7 +163,6 @@ class ArticleRepositoryImplTest {
         }
     }
 
-    @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @DBRider
     class Find {
@@ -248,7 +244,6 @@ class ArticleRepositoryImplTest {
         }
     }
 
-    @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @DBRider
     class Update {
@@ -372,7 +367,6 @@ class ArticleRepositoryImplTest {
         }
     }
 
-    @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @DBRider
     class Delete {
