@@ -78,7 +78,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
         return createdArticle.right()
     }
 
-    override fun find(): Either<ArticleRepository.FindError, List<CreatedArticle>> {
+    override fun all(): Either<ArticleRepository.FindError, List<CreatedArticle>> {
         val sql = """
             SELECT
                 articles.slug

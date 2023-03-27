@@ -43,7 +43,7 @@ interface ArticleRepository {
      *
      * @return
      */
-    fun find(): Either<FindError, List<CreatedArticle>> = throw NotImplementedError()
+    fun all(): Either<FindError, List<CreatedArticle>> = throw NotImplementedError()
 
     /**
      * ArticleRepository.find のエラーインタフェース

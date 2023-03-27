@@ -48,7 +48,7 @@ class FeedArticleUseCaseImpl(val articleRepository: ArticleRepository) : FeedArt
         /**
          * 記事を全て取得する
          */
-        val createdArticles = articleRepository.find().fold(
+        val createdArticles = articleRepository.all().fold(
             { throw UnsupportedOperationException("想定外のエラー") },
             { it }
         )

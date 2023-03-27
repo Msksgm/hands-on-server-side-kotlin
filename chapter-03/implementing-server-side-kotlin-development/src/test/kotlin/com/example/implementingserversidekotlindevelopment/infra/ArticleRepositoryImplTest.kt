@@ -168,7 +168,7 @@ class ArticleRepositoryImplTest {
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @DBRider
-    class Find {
+    class All {
         @BeforeAll
         fun reset() = DbConnection.resetSequence()
 
@@ -178,7 +178,7 @@ class ArticleRepositoryImplTest {
                 "datasets/yml/given/empty-articles.yml"
             ]
         )
-        fun `正常系-作成済記事が 1 つもない場合、からの作成済記事の一覧が戻り値`() {
+        fun `正常系-作成済記事が 1 つもない場合、空の作成済記事の一覧が戻り値`() {
             /**
              * given:
              */
@@ -187,7 +187,7 @@ class ArticleRepositoryImplTest {
             /**
              * when:
              */
-            val actual = articleRepository.find()
+            val actual = articleRepository.all()
 
             /**
              * then:
@@ -211,7 +211,7 @@ class ArticleRepositoryImplTest {
             /**
              * when:
              */
-            val actual = articleRepository.find()
+            val actual = articleRepository.all()
 
             /**
              * then:
