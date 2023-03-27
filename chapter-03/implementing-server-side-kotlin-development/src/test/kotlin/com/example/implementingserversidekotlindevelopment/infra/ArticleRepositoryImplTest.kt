@@ -175,7 +175,7 @@ class ArticleRepositoryImplTest {
                 "datasets/yml/given/empty-articles.yml"
             ]
         )
-        fun `正常系-作成済記事が 1 つもない場合、からの作成済記事の一覧が戻り値`() {
+        fun `正常系-作成済記事が 1 つもない場合、空の作成済記事の一覧が戻り値`() {
             /**
              * given:
              */
