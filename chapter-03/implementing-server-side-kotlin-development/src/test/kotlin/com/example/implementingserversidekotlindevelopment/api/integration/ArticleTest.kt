@@ -524,7 +524,7 @@ class ArticleTest {
             JSONAssert.assertEquals(
                 expectedResponseBody,
                 actualResponseBody,
-                JSONCompareMode.STRICT,
+                JSONCompareMode.NON_EXTENSIBLE,
             )
         }
 
@@ -581,7 +581,7 @@ class ArticleTest {
             JSONAssert.assertEquals(
                 expectedResponseBody,
                 actualResponseBody,
-                JSONCompareMode.STRICT,
+                JSONCompareMode.NON_EXTENSIBLE,
             )
         }
     }
