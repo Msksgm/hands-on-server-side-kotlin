@@ -7,5 +7,6 @@ import org.springframework.boot.runApplication
 class ImplementingServerSideKotlinDevelopmentApplication
 
 fun main(args: Array<String>) {
-	runApplication<ImplementingServerSideKotlinDevelopmentApplication>(*args)
+    @Suppress("SpreadOperator")
+    runApplication<ImplementingServerSideKotlinDevelopmentApplication>(*args)
 }
