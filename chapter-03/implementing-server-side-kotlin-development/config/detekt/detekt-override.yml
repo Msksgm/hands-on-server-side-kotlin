@@ -1,0 +1,106 @@
+---
+# comments のルール
+comments:
+  active: true
+  #
+  # UndocumentedPublicClass
+  #
+  # 概要
+  # - コメントがないパブリッククラスを禁止する
+  #
+  UndocumentedPublicClass:
+    active: true  # (default: false)
+  #
+  # UndocumentedPublicFunction
+  #
+  # 概要
+  # - コメントがないパブリックな関数を禁止する
+  #
+  UndocumentedPublicFunction:
+    active: true  # (default: false)
+  #
+  # UndocumentedPublicProperty
+  #
+  # 概要
+  # - コメントがないパブリックなプロパティを禁止する
+  #
+  UndocumentedPublicProperty:
+    active: true  # (default: false)
+
+# style のルール
+style:
+  active: true
+  #
+  # UnusedImports
+  #
+  # 概要
+  # - 未使用の import を禁止する
+  #
+  UnusedImports:
+    active: true  # (default: false)
+  #
+  # MaxLineLength
+  # 概要
+  # - 1 行あたりの最大文字数
+  #
+  MaxLineLength:
+    active: true
+    excludes: ['**/test/**'] # (default: なし）
+    maxLineLength: 120
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: false
+  #
+  # ReturnCount
+  # 概要
+  # - 関数あたりの return を記述可能な最大の数
+  #
+  ReturnCount:
+    active: true
+    max: 4 # (default: 2)
+    excludedFunctions: 'equals'
+    excludeLabeled: false
+    excludeReturnFromLambda: true
+    excludeGuardClauses: false
+  #
+  # ThrowsCount
+  # 概要
+  # - 関数あたりの throw を記述可能な最大の数
+  #
+  ThrowsCount:
+    active: true
+    excludes: ['**/test/**'] # (default: なし）
+    max: 2
+    excludeGuardClauses: false
+
+# formatter のルール
+formatting:
+  active: true
+  android: false
+  autoCorrect: true
+  #
+  # MaximumLineLength
+  # 概要
+  # - 1 行あたりの最大文字数
+  # - style>MaxLineLength のwrapper
+  # - style>MaxLineLength を修正したとき、こちらも修正が必要
+  #
+  MaximumLineLength:
+    active: true
+    excludes: ['**/test/**'] # (default: なし）
+    maxLineLength: 120
+    ignoreBackTickedIdentifier: false
+
+# 潜在的なバグの検出
+potential-bugs:
+  active: true
+  #
+  # UnsafeCallOnNullableType
+  # 概要
+  # - null 許容型に対しての安全でない呼び出しを禁止する
+  UnsafeCallOnNullableType:
+    active: true
+    # 以下を除外対象に追加
+    # - "**/presentation/model/**"
+    #   - 理由: Validation のアノテーションで null チェックを実施し、セッターで `!!` を利用して non-null 型にするため。
+    excludes: ["**/presentation/model/**", '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']

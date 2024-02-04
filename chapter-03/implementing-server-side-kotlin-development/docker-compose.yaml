@@ -1,0 +1,22 @@
+---
+
+version: '3.8'
+
+services:
+  #
+  # PostgreSQL
+  #
+  sample-pg:
+    image: postgres:15-bullseye
+    container_name: sample-pg
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: sample-user
+      POSTGRES_PASSWORD: sample-pass
+      POSTGRES_DB: sample-db
+      POSTGRES_INIT_DB_ARGS: --encoding=UTF-8
+    volumes:
+      - type: bind
+        source: ./docker/db/sql/
+        target: /docker-entrypoint-initdb.d/
