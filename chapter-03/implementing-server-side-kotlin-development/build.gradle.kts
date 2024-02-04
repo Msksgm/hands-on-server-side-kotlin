@@ -180,6 +180,20 @@ dependencies {
 	 * これを入れるだけで、application.properties/yamlや@ConfigurationによるDB接続設定が必要になる
 	 */
 	implementation("org.springframework.boot:spring-boot-starter-jdbc")
+
+	/**
+	 * postgresql
+	 *
+	 * URL
+	 * - https://jdbc.postgresql.org/
+	 * MavenCentral
+	 * - https://mvnrepository.com/artifact/org.postgresql/postgresql
+	 * Main用途
+	 * - DBつなぐ時のドライバ
+	 * 概要
+	 * - 特になし
+	 */
+	implementation("org.postgresql:postgresql")
 }
 
 tasks.withType<KotlinCompile> {
