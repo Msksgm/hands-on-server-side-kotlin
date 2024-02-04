@@ -164,6 +164,22 @@ dependencies {
 	 * - CLI から springdoc を利用して OpenAPI を 生成する
 	 */
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+
+	/**
+	 * Spring JDBC
+	 *
+	 * URL
+	 * - https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/core/package-summary.html
+	 * MavenCentral
+	 * - https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jdbc
+	 * Main用途
+	 * - DBへ保存
+	 * 概要
+	 * - 特になし
+	 *
+	 * これを入れるだけで、application.properties/yamlや@ConfigurationによるDB接続設定が必要になる
+	 */
+	implementation("org.springframework.boot:spring-boot-starter-jdbc")
 }
 
 tasks.withType<KotlinCompile> {
