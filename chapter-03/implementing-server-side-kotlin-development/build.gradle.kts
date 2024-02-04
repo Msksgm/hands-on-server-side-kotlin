@@ -66,3 +66,18 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+/**
+ * detektの設定
+ *
+ * 基本的に全て `detekt-override.yml` で設定する
+ */
+detekt {
+	/**
+	 * ./gradlew detektGenerateConfig でdetekt.ymlが生成される(バージョンが上がる度に再生成する)
+	 */
+	config = files(
+		"$projectDir/config/detekt/detekt.yml",
+		"$projectDir/config/detekt/detekt-override.yml",
+	)
+}
