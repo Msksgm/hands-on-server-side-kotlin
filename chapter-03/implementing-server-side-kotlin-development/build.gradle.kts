@@ -42,6 +42,20 @@ plugins {
 	 * - JDocの代替(=KDoc)
 	 */
 	id("org.jetbrains.dokka") version "1.9.10"
+
+	/**
+	 * springdoc
+	 *
+	 * URL
+	 * - https://springdoc.org/
+	 * Main 用途
+	 * - OpenAPI 仕様に基づいたドキュメントを生成する
+	 * Sub 用途
+	 * - なし
+	 * 概要
+	 * コードから OpenAPI 仕様に基づいたドキュメントの生成ライブラリ
+	 */
+	id("org.springdoc.openapi-gradle-plugin") version "1.8.0"
 }
 
 group = "com.example"
@@ -128,6 +142,28 @@ dependencies {
 	 */
 	testImplementation("net.jqwik:jqwik:1.8.2")
 	testImplementation("net.jqwik:jqwik-kotlin:1.8.2")
+
+	/**
+	 * Spring Boot Starter Validation
+	 *
+	 * MavenCentral
+	 * - https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
+	 * Main用途
+	 * - コントローラーのバリデーションのために利用する
+	 * Sub用途
+	 * - 無し
+	 * 概要
+	 * - Validation を実装した際に、本ライブラリがなければ、バリデーションが動作しない
+	 */
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+	/**
+	 * springdoc の gradle 拡張
+	 *
+	 * 概要
+	 * - CLI から springdoc を利用して OpenAPI を 生成する
+	 */
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 }
 
 tasks.withType<KotlinCompile> {
