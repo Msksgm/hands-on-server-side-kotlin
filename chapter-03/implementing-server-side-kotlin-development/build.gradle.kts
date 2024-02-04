@@ -77,6 +77,22 @@ dependencies {
 	 * dokka Pluginを適用するのに必要
 	 */
 	dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.9.10")
+
+	/**
+	 * Arrow Core
+	 *
+	 * URL
+	 * - https://arrow-kt.io/
+	 * MavenCentral
+	 * - https://mvnrepository.com/artifact/io.arrow-kt/arrow-core
+	 * Main用途
+	 * - Either/Validatedを使ったRailway Oriented Programming
+	 * Sub用途
+	 * - Optionを使ったletの代替
+	 * 概要
+	 * - Kotlinで関数型プログラミングをするときに便利なライブラリ
+	 */
+	implementation("io.arrow-kt:arrow-core:1.2.1")
 }
 
 tasks.withType<KotlinCompile> {
