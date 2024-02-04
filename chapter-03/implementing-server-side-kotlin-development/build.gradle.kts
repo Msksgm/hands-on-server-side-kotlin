@@ -194,6 +194,28 @@ dependencies {
 	 * - 特になし
 	 */
 	implementation("org.postgresql:postgresql")
+
+	/**
+	 * Database Rider
+	 *
+	 * - Rider Core
+	 * - Rider Spring
+	 * - Rider JUnit 5
+	 *
+	 * URL
+	 * - https://database-rider.github.io/database-rider/
+	 * MavenCentral
+	 * - https://mvnrepository.com/artifact/com.github.database-rider/rider-core
+	 * - https://mvnrepository.com/artifact/com.github.database-rider/rider-spring
+	 * - https://mvnrepository.com/artifact/com.github.database-rider/rider-junit5
+	 * Main用途
+	 * - JUnitでDB周りのテスト時のヘルパー
+	 * 概要
+	 * - テーブルの事前条件、事後条件を簡潔に設定できる
+	 */
+	implementation("com.github.database-rider:rider-core:1.41.0")
+	implementation("com.github.database-rider:rider-spring:1.41.0")
+	testImplementation("com.github.database-rider:rider-junit5:1.41.0")
 }
 
 tasks.withType<KotlinCompile> {
