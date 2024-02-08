@@ -18,7 +18,7 @@ dependencies {
      * Arrow Core
      *
      * URL
-     * - https://arrow-kt.io/docs/core/
+     * - https://arrow-kt.io/
      * MavenCentral
      * - https://mvnrepository.com/artifact/io.arrow-kt/arrow-core
      * Main用途
@@ -28,7 +28,7 @@ dependencies {
      * 概要
      * - Kotlinで関数型プログラミングをするときに便利なライブラリ
      */
-    implementation("io.arrow-kt:arrow-core:1.1.5")
+    implementation("io.arrow-kt:arrow-core:1.2.1")
 }
 
 tasks.test {
