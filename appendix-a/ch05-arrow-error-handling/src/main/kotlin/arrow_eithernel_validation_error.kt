@@ -1,4 +1,4 @@
-package arrow_valid_validation_error
+package arrow_eithernel_validation_error
 
 import arrow.core.Either
 import arrow.core.EitherNel
