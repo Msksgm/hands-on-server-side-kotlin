@@ -46,7 +46,7 @@ style:
   MaxLineLength:
     active: true
     excludes: ['**/test/**'] # (default: なし）
-    maxLineLength: 120
+    maxLineLength: 220 #（default: 120） SpringBoot と SpringDoc のアノテーションによって、超過しやすいので緩めに設定
     excludePackageStatements: true
     excludeImportStatements: true
     excludeCommentStatements: false
@@ -58,7 +58,8 @@ style:
   ReturnCount:
     active: true
     max: 4 # (default: 2)
-    excludedFunctions: 'equals'
+    excludedFunctions:
+      - 'equals'
     excludeLabeled: false
     excludeReturnFromLambda: true
     excludeGuardClauses: false
@@ -78,6 +79,14 @@ formatting:
   active: true
   android: false
   autoCorrect: true
+  TrailingCommaOnCallSite:
+    active: true
+    autoCorrect: true
+    useTrailingCommaOnCallSite: true
+  TrailingCommaOnDeclarationSite:
+    active: true
+    autoCorrect: true
+    useTrailingCommaOnDeclarationSite: true
   #
   # MaximumLineLength
   # 概要
@@ -88,7 +97,7 @@ formatting:
   MaximumLineLength:
     active: true
     excludes: ['**/test/**'] # (default: なし）
-    maxLineLength: 120
+    maxLineLength: 220 #（default: 120） SpringBoot と SpringDoc のアノテーションによって、超過しやすいので緩めに設定
     ignoreBackTickedIdentifier: false
 
 # 潜在的なバグの検出
