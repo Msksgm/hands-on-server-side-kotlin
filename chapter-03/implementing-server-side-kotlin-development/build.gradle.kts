@@ -243,3 +243,9 @@ detekt {
 		"$projectDir/config/detekt/detekt-override.yml",
 	)
 }
+
+openApi {
+	apiDocsUrl.set("http://localhost:8080/v3/api-docs.yaml")
+	outputDir.set(project.layout.buildDirectory.dir("springdoc"))
+	outputFileName.set("openapi.yaml")
+}
