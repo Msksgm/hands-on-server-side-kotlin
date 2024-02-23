@@ -1,6 +1,9 @@
 package com.example.implementingserversidekotlindevelopment.usecase
 
 import arrow.core.Either
+import arrow.core.getOrElse
+import arrow.core.right
+import com.example.implementingserversidekotlindevelopment.domain.ArticleRepository
 import com.example.implementingserversidekotlindevelopment.domain.CreatedArticle
 import org.springframework.stereotype.Service
 
@@ -39,6 +42,19 @@ interface FeedArticleUseCase {
 /**
  * 作成済記事一覧表示ユースケースの具象クラス
  *
+ * @property articleRepository
  */
 @Service
-class FeedArticleUseCaseImpl : FeedArticleUseCase
+class FeedArticleUseCaseImpl(val articleRepository: ArticleRepository) : FeedArticleUseCase {
+    override fun execute(): Either<FeedArticleUseCase.Error, FeedArticleUseCase.FeedCreatedArticles> {
+        /**
+         * 記事を全て取得する
+         */
+        val createdArticles = articleRepository.all().getOrElse { throw UnsupportedOperationException("想定外のエラー") }
+
+        return FeedArticleUseCase.FeedCreatedArticles(
+            articles = createdArticles,
+            articlesCount = createdArticles.size
+        ).right()
+    }
+}

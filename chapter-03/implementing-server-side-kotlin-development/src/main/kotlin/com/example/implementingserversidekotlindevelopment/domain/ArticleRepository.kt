@@ -41,4 +41,18 @@ interface ArticleRepository {
      *
      */
     sealed interface CreateArticleError
+
+    /**
+     * 作成済記事の一覧取得
+     *
+     * @return
+     */
+    fun all(): Either<FindError, List<CreatedArticle>> = throw NotImplementedError()
+
+    /**
+     * ArticleRepository.all のエラーインタフェース
+     *
+     * エラーになるパターンが存在しない
+     */
+    sealed interface FindError
 }
