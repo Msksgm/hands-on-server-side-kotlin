@@ -4,9 +4,11 @@ import arrow.core.getOrElse
 import com.example.implementingserversidekotlindevelopment.presentation.model.Article
 import com.example.implementingserversidekotlindevelopment.presentation.model.GenericErrorModel
 import com.example.implementingserversidekotlindevelopment.presentation.model.GenericErrorModelErrors
+import com.example.implementingserversidekotlindevelopment.presentation.model.MultipleArticleResponse
 import com.example.implementingserversidekotlindevelopment.presentation.model.NewArticleRequest
 import com.example.implementingserversidekotlindevelopment.presentation.model.SingleArticleResponse
 import com.example.implementingserversidekotlindevelopment.usecase.CreateArticleUseCase
+import com.example.implementingserversidekotlindevelopment.usecase.FeedArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.ShowArticleUseCase
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -26,18 +28,21 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.lang.UnsupportedOperationException
 
 /**
  * 作成済記事記事のコントローラー
  *
  * @property showArticleUseCase 単一記事取得ユースケース
  * @property createArticleUseCase 記事作成ユースケース
+ * @property feedArticleUseCase 記事一覧取得ユースケース
  */
 @RestController
 @Validated
 class ArticleController(
     val showArticleUseCase: ShowArticleUseCase,
     val createArticleUseCase: CreateArticleUseCase,
+    val feedArticleUseCase: FeedArticleUseCase,
 ) {
     /**
      * 単一の作成済記事取得
@@ -281,4 +286,70 @@ class ArticleController(
                 HttpStatus.FORBIDDEN
             )
         }
+
+    /**
+     * 新規記事作成
+     *
+     * @return
+     */
+    @Operation(
+        summary = "記事一覧取得",
+        operationId = "GetArticles",
+        description = "記事を一覧取得します",
+        tags = ["articles"],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "OK",
+                content = [
+                    Content(
+                        schema = Schema(implementation = MultipleArticleResponse::class),
+                        examples = [
+                            ExampleObject(
+                                name = "OK",
+                                value = """
+                                    {
+                                        "articleCount": 2,
+                                        "articles": [
+                                            {
+                                                "slug": "slug0000000000000000000000000001",
+                                                "title": "dummy-title-01",
+                                                "description": "dummy-description-01",
+                                                "body": "dummy-body-01"
+                                            },
+                                            {
+                                                "slug": "slug0000000000000000000000000002",
+                                                "title": "dummy-title-02",
+                                                "description": "dummy-description-02",
+                                                "body": "dummy-body-02"
+                                            }
+                                        ]
+                                    }
+                                """
+                            )
+                        ]
+                    )
+                ]
+            ),
+        ]
+    )
+    @GetMapping("/api/articles", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getArticles(): ResponseEntity<MultipleArticleResponse> {
+        val createdArticles = feedArticleUseCase.execute().getOrElse { throw UnsupportedOperationException("想定外のエラー") }
+
+        return ResponseEntity(
+            MultipleArticleResponse(
+                articleCount = createdArticles.articlesCount,
+                articles = createdArticles.articles.map {
+                    Article(
+                        slug = it.slug.value,
+                        title = it.title.value,
+                        description = it.description.value,
+                        body = it.body.value,
+                    )
+                }
+            ),
+            HttpStatus.OK
+        )
+    }
 }
