@@ -2,13 +2,16 @@ package com.example.implementingserversidekotlindevelopment.api.integration
 
 import com.example.implementingserversidekotlindevelopment.api.integration.helper.DbConnection
 import com.github.database.rider.core.api.dataset.DataSet
+import com.github.database.rider.core.api.dataset.ExpectedDataSet
 import com.github.database.rider.junit5.api.DBRider
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.skyscreamer.jsonassert.Customization
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
+import org.skyscreamer.jsonassert.comparator.CustomComparator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -16,6 +19,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 
 class ArticleTest {
     @SpringBootTest
@@ -163,7 +167,6 @@ class ArticleTest {
             )
         }
 
-
         @Test
         fun `異常系-slug が 32 文字でない場合、バリデーションエラー`() {
             /**
@@ -201,6 +204,254 @@ class ArticleTest {
                 expectedResponseBody,
                 actualResponseBody,
                 JSONCompareMode.NON_EXTENSIBLE
+            )
+        }
+    }
+
+    @SpringBootTest
+    @AutoConfigureMockMvc
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @DBRider
+    class CreateArticle(
+        @Autowired val mockMvc: MockMvc,
+    ) {
+        @BeforeEach
+        fun reset() = DbConnection.resetSequence()
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        @ExpectedDataSet(
+            value = ["datasets/yml/then/created-articles.yml"],
+            orderBy = ["id"],
+            ignoreCols = ["slug"]
+        )
+        // NOTE: @ExportDataSetはgivenの@DataSetが変更された時用に残しておく
+        // @ExportDataSet(
+        //     format = DataSetFormat.YML,
+        //     outputName = "src/test/resources/datasets/yml/then/created-articles.yml",
+        //     includeTables = ["articles"]
+        // )
+        fun `正常系-記事が作成される`() {
+            /**
+             * given:
+             */
+            val requestBody = """
+                {
+                  "article": {
+                    "title": "dummy-title-01",
+                    "description": "dummy-description-01",
+                    "body": "dummy-body-01"
+                  }
+                }
+            """.trimIndent()
+
+            /**
+             * when:
+             */
+            val response = mockMvc.post("/api/articles") {
+                contentType = MediaType.APPLICATION_JSON
+                content = requestBody
+            }.andReturn().response
+            val actualStatus = response.status
+            val actualResponseBody = response.contentAsString
+
+            /**
+             * then:
+             * - ステータスコードが一致する
+             * - レスポンスボディが一致する
+             * - JSON レスポンスを比較する。slug は自動生成されるので、形式だけ確認する
+             */
+            val expectedStatus = HttpStatus.CREATED.value()
+            val expectedResponseBody = """
+                {
+                  "article": {
+                    "slug": "slug0000000000000000000000000001",
+                    "title": "dummy-title-01",
+                    "description": "dummy-description-01",
+                    "body": "dummy-body-01"
+                  }
+                }
+            """.trimIndent()
+            assertThat(actualStatus).isEqualTo(expectedStatus)
+            JSONAssert.assertEquals(
+                expectedResponseBody,
+                actualResponseBody,
+                CustomComparator(
+                    JSONCompareMode.STRICT,
+                    Customization("article.slug") { actualSlug, _ -> actualSlug.toString().matches(Regex("^[a-z0-9]{32}\$")) }
+                )
+            )
+        }
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-バリデーションエラー title、description、body がないときバリデーションエラー`() {
+            /**
+             * given:
+             * - title、description、body がない
+             */
+            val responseBody = """
+                {
+                  "article": {}
+                }
+            """.trimIndent()
+
+            /**
+             * when:
+             */
+            val response = mockMvc.post("/api/articles") {
+                contentType = MediaType.APPLICATION_JSON
+                content = responseBody
+            }.andReturn().response
+            val actualStatus = response.status
+            val actualResponseBody = response.contentAsString
+
+            /**
+             * then:
+             * - ステータスコードが一致する
+             * - レスポンスボディが一致する
+             */
+            val expectedStatus = HttpStatus.BAD_REQUEST.value()
+            val expectedResponseBody = """
+                {
+                    "errors": {
+                        "body": [
+                            "article.descriptionは必須です",
+                            "article.titleは必須です",
+                            "article.bodyは必須です"
+                        ]
+                    }
+                }
+            """.trimIndent()
+            assertThat(actualStatus).isEqualTo(expectedStatus)
+            JSONAssert.assertEquals(
+                expectedResponseBody,
+                actualResponseBody,
+                JSONCompareMode.NON_EXTENSIBLE,
+            )
+        }
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-バリデーションエラー title は必須`() {
+            /**
+             * given:
+             * - title が 空白
+             */
+            val title = ""
+            val responseBody = """
+                {
+                  "article": {
+                    "title": "$title",
+                    "description": "",
+                    "body": ""
+                  }
+                }
+            """.trimIndent()
+
+            /**
+             * when:
+             */
+            val response = mockMvc.post("/api/articles") {
+                contentType = MediaType.APPLICATION_JSON
+                content = responseBody
+            }.andReturn().response
+            val actualStatus = response.status
+            val actualResponseBody = response.contentAsString
+
+            /**
+             * then:
+             * - ステータスコードが一致する
+             * - レスポンスボディが一致する
+             */
+            val expectedStatus = HttpStatus.BAD_REQUEST.value()
+            val expectedResponseBody = """
+                {
+                    "errors": {
+                        "body": [
+                            "article.titleは必須です"
+                        ]
+                    }
+                }
+            """.trimIndent()
+            assertThat(actualStatus).isEqualTo(expectedStatus)
+            JSONAssert.assertEquals(
+                expectedResponseBody,
+                actualResponseBody,
+                JSONCompareMode.NON_EXTENSIBLE,
+            )
+        }
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-バリデーションエラー title が 33 文字以上、description が 65 文字以上、body が 1025 文字以上`() {
+            /**
+             * given:
+             * - title が 32 文字超過
+             * - description が 64 文字超過
+             * - body が 1024 文字超過
+             */
+            val title = "a".repeat(33)
+            val description = "a".repeat(65)
+            val body = "a".repeat(1025)
+            val responseBody = """
+                {
+                  "article": {
+                    "title": "$title",
+                    "description": "$description",
+                    "body": "$body"
+                  }
+                }
+            """.trimIndent()
+
+            /**
+             * when:
+             */
+            val response = mockMvc.post("/api/articles") {
+                contentType = MediaType.APPLICATION_JSON
+                content = responseBody
+            }.andReturn().response
+            val actualStatus = response.status
+            val actualResponseBody = response.contentAsString
+
+            /**
+             * then:
+             * - ステータスコードが一致する
+             * - レスポンスボディが一致する
+             */
+            val expectedStatus = HttpStatus.BAD_REQUEST.value()
+            val expectedResponseBody = """
+                {
+                    "errors": {
+                        "body": [
+                            "article.titleは0文字以上32文字以下にしてください",
+                            "article.bodyは0文字以上1024文字以下にしてください",
+                            "article.descriptionは0文字以上64文字以下にしてください"
+                        ]
+                    }
+                }
+            """.trimIndent()
+            assertThat(actualStatus).isEqualTo(expectedStatus)
+            JSONAssert.assertEquals(
+                expectedResponseBody,
+                actualResponseBody,
+                JSONCompareMode.NON_EXTENSIBLE,
             )
         }
     }

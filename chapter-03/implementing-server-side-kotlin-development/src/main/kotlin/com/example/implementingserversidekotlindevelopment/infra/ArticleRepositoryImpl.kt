@@ -50,4 +50,30 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
             body = Body.newWithoutValidation(articleMap["body"].toString()),
         ).right()
     }
+
+    override fun create(createdArticle: CreatedArticle): Either<ArticleRepository.CreateArticleError, CreatedArticle> {
+        val sql = """
+            INSERT INTO articles (
+                slug
+                , title
+                , body
+                , description
+            )
+            VALUES (
+                :slug
+                , :title
+                , :body
+                , :description
+            )
+        """.trimIndent()
+        namedParameterJdbcTemplate.update(
+            sql,
+            MapSqlParameterSource()
+                .addValue("slug", createdArticle.slug.value)
+                .addValue("title", createdArticle.title.value)
+                .addValue("body", createdArticle.body.value)
+                .addValue("description", createdArticle.description.value)
+        )
+        return createdArticle.right()
+    }
 }
