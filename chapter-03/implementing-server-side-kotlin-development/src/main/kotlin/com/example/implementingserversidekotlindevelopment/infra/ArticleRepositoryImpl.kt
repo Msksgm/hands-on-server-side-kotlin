@@ -76,4 +76,26 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
         )
         return createdArticle.right()
     }
+
+    override fun all(): Either<ArticleRepository.FindError, List<CreatedArticle>> {
+        val sql = """
+            SELECT
+                articles.slug
+                , articles.title
+                , articles.body
+                , articles.description
+            FROM
+                articles
+            ;
+        """.trimIndent()
+        val articleMap = namedParameterJdbcTemplate.queryForList(sql, MapSqlParameterSource())
+        return articleMap.map {
+            CreatedArticle.newWithoutValidation(
+                Slug.newWithoutValidation(it["slug"].toString()),
+                Title.newWithoutValidation(it["title"].toString()),
+                Description.newWithoutValidation(it["description"].toString()),
+                Body.newWithoutValidation(it["body"].toString())
+            )
+        }.right()
+    }
 }
