@@ -40,6 +40,7 @@ class ArticleController(val showArticleUseCase: ShowArticleUseCase) {
         summary = "単一記事取得",
         operationId = "getArticle",
         description = "slug に一致する記事を取得します。",
+        tags = ["articles"],
         responses = [
             ApiResponse(
                 responseCode = "200",
