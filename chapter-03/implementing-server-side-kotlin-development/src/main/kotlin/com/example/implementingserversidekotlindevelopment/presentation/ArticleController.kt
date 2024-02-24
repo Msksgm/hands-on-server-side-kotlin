@@ -9,6 +9,7 @@ import com.example.implementingserversidekotlindevelopment.presentation.model.Ne
 import com.example.implementingserversidekotlindevelopment.presentation.model.SingleArticleResponse
 import com.example.implementingserversidekotlindevelopment.presentation.model.UpdateArticleRequest
 import com.example.implementingserversidekotlindevelopment.usecase.CreateArticleUseCase
+import com.example.implementingserversidekotlindevelopment.usecase.DeleteCreatedArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.FeedArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.ShowArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.UpdateArticleUseCase
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -40,6 +42,7 @@ import java.lang.UnsupportedOperationException
  * @property createArticleUseCase 記事作成ユースケース
  * @property feedArticleUseCase 記事一覧取得ユースケース
  * @property updateArticleUseCase 記事更新ユースーケース
+ * @property deleteCreatedArticleUseCase 記事削除ユースケース
  */
 @RestController
 @Validated
@@ -48,6 +51,7 @@ class ArticleController(
     val createArticleUseCase: CreateArticleUseCase,
     val feedArticleUseCase: FeedArticleUseCase,
     val updateArticleUseCase: UpdateArticleUseCase,
+    val deleteCreatedArticleUseCase: DeleteCreatedArticleUseCase,
 ) {
     /**
      * 単一の作成済記事取得
@@ -507,6 +511,127 @@ class ArticleController(
             )
 
             is UpdateArticleUseCase.Error.ValidationErrors -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = error.errors.map { it.message }
+                    )
+                ),
+                HttpStatus.FORBIDDEN
+            )
+        }
+
+    /**
+     * 作成済記事削除
+     *
+     * @return
+     */
+    @Operation(
+        summary = "作成済記事削除",
+        operationId = "DeleteArticle",
+        description = "作成済記事を削除します",
+        tags = ["articles"],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "OK",
+                content = [
+                    Content(
+                        examples = [
+                            ExampleObject(
+                                name = "OK",
+                                value = "{}"
+                            )
+                        ]
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Validation Error",
+                content = [
+                    Content(
+                        schema = Schema(implementation = GenericErrorModel::class),
+                        examples = [
+                            ExampleObject(
+                                name = "Validation Error",
+                                value = """
+                                    {
+                                        "errors": {
+                                            "body": [
+                                                "slugは32文字以上32文字以下にしてください"
+                                            ]
+                                        }
+                                    }
+                                """
+                            )
+                        ]
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Not Found",
+                content = [
+                    Content(
+                        schema = Schema(implementation = GenericErrorModel::class),
+                        examples = [
+                            ExampleObject(
+                                name = "Not Found",
+                                value = """
+                                    {
+                                        "errors": {
+                                            "body": [
+                                                "slug に該当する記事は見つかりませんでした"
+                                            ]
+                                        }
+                                    }
+                                """
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
+    @DeleteMapping("/api/articles/{slug}")
+    fun deleteArticle(
+        @Parameter(description = "記事の slug", required = true, schema = Schema(minLength = 32, maxLength = 32)) @Valid @PathVariable("slug") @Length(min = 32, max = 32) slug: String,
+    ): ResponseEntity<Unit> {
+        deleteCreatedArticleUseCase.execute(slug).getOrElse { throw DeleteCreatedArticleUseCaseErrorException(it) }
+
+        return ResponseEntity(Unit, HttpStatus.OK)
+    }
+
+    /**
+     * 記事削除ユースケースがエラーを戻したときの Exception
+     *
+     * このクラスの例外が発生したときに、@ExceptionHandler で例外をおこなう
+     *
+     * @property error
+     */
+    data class DeleteCreatedArticleUseCaseErrorException(val error: DeleteCreatedArticleUseCase.Error) : Exception()
+
+    /**
+     * DeleteArticleUseCaseErrorException をハンドリングする関数
+     *
+     * DeleteArticleUseCase.Error の型に合わせてレスポンスを分岐する
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = [DeleteCreatedArticleUseCaseErrorException::class])
+    fun onDeleteCreatedArticleUseCaseErrorException(e: DeleteCreatedArticleUseCaseErrorException): ResponseEntity<GenericErrorModel> =
+        when (val error = e.error) {
+            is DeleteCreatedArticleUseCase.Error.NotFoundArticleBySlug -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = listOf("${error.slug.value} に該当する記事は見つかりませんでした")
+                    )
+                ),
+                HttpStatus.NOT_FOUND
+            )
+
+            is DeleteCreatedArticleUseCase.Error.ValidationErrors -> ResponseEntity(
                 GenericErrorModel(
                     errors = GenericErrorModelErrors(
                         body = error.errors.map { it.message }
