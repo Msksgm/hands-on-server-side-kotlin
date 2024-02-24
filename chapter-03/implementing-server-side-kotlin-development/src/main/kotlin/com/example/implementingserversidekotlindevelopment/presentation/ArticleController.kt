@@ -7,9 +7,11 @@ import com.example.implementingserversidekotlindevelopment.presentation.model.Ge
 import com.example.implementingserversidekotlindevelopment.presentation.model.MultipleArticleResponse
 import com.example.implementingserversidekotlindevelopment.presentation.model.NewArticleRequest
 import com.example.implementingserversidekotlindevelopment.presentation.model.SingleArticleResponse
+import com.example.implementingserversidekotlindevelopment.presentation.model.UpdateArticleRequest
 import com.example.implementingserversidekotlindevelopment.usecase.CreateArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.FeedArticleUseCase
 import com.example.implementingserversidekotlindevelopment.usecase.ShowArticleUseCase
+import com.example.implementingserversidekotlindevelopment.usecase.UpdateArticleUseCase
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.lang.UnsupportedOperationException
@@ -36,6 +39,7 @@ import java.lang.UnsupportedOperationException
  * @property showArticleUseCase 単一記事取得ユースケース
  * @property createArticleUseCase 記事作成ユースケース
  * @property feedArticleUseCase 記事一覧取得ユースケース
+ * @property updateArticleUseCase 記事更新ユースーケース
  */
 @RestController
 @Validated
@@ -43,6 +47,7 @@ class ArticleController(
     val showArticleUseCase: ShowArticleUseCase,
     val createArticleUseCase: CreateArticleUseCase,
     val feedArticleUseCase: FeedArticleUseCase,
+    val updateArticleUseCase: UpdateArticleUseCase,
 ) {
     /**
      * 単一の作成済記事取得
@@ -352,4 +357,162 @@ class ArticleController(
             HttpStatus.OK
         )
     }
+
+    /**
+     * 作成済記事更新
+     *
+     * @return
+     */
+    @Operation(
+        summary = "作成済記事更新",
+        operationId = "UpdateArticle",
+        description = "作成済記事を更新します",
+        tags = ["articles"],
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "OK",
+                content = [
+                    Content(
+                        schema = Schema(implementation = SingleArticleResponse::class),
+                        examples = [
+                            ExampleObject(
+                                name = "OK",
+                                value = """
+                                    {
+                                        "article": {
+                                            "slug": "283e60096c26aa3a39cf04712cdd1ff7",
+                                            "title": "updated-article-title",
+                                            "description": "updated-article-description",
+                                            "body": "updated-article-body"
+                                        }
+                                    }
+                                """
+                            )
+                        ]
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Validation Error",
+                content = [
+                    Content(
+                        schema = Schema(implementation = GenericErrorModel::class),
+                        examples = [
+                            ExampleObject(
+                                name = "Validation Error",
+                                value = """
+                                    {
+                                        "errors": {
+                                            "body": [
+                                                "article.titleは必須です",
+                                                "article.bodyは0文字以上64文字以下です",
+                                                "article.descriptionは0文字以上1024文字以下です"
+                                            ]
+                                        }
+                                    }
+                                """
+                            )
+                        ]
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Not Found",
+                content = [
+                    Content(
+                        schema = Schema(implementation = GenericErrorModel::class),
+                        examples = [
+                            ExampleObject(
+                                name = "Not Found",
+                                value = """
+                                    {
+                                        "errors": {
+                                            "body": [
+                                                "slug に該当する記事は見つかりませんでした"
+                                            ]
+                                        }
+                                    }
+                                """
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
+    @PutMapping("/api/articles/{slug}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun updateArticle(
+        @Parameter(description = "記事の slug", required = true, schema = Schema(minLength = 32, maxLength = 32)) @Valid @PathVariable("slug") @Length(min = 32, max = 32) slug: String,
+        @Valid @RequestBody updateArticleRequest: UpdateArticleRequest,
+    ): ResponseEntity<SingleArticleResponse> {
+        val updatedArticle = updateArticleUseCase.execute(
+            slug = slug,
+            title = updateArticleRequest.validatedArticle.validatedTitle,
+            description = updateArticleRequest.validatedArticle.validatedDescription,
+            body = updateArticleRequest.validatedArticle.validatedBody,
+        ).getOrElse { throw UpdateArticleUseCaseErrorException(it) }
+
+        return ResponseEntity(
+            SingleArticleResponse(
+                article = Article(
+                    slug = updatedArticle.slug.value,
+                    title = updatedArticle.title.value,
+                    description = updatedArticle.description.value,
+                    body = updatedArticle.body.value,
+                ),
+            ),
+            HttpStatus.OK
+        )
+    }
+
+    /**
+     * 記事更新ユースケースがエラーを戻したときの Exception
+     *
+     * このクラスの例外が発生したときに、@ExceptionHandler で例外をおこなう
+     *
+     * @property error
+     */
+    data class UpdateArticleUseCaseErrorException(val error: UpdateArticleUseCase.Error) : Throwable()
+
+    /**
+     * UpdateArticleUseCaseErrorException をハンドリングする関数
+     *
+     * UpdateArticleUseCase.Error の型に合わせてレスポンスを分岐する
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = [UpdateArticleUseCaseErrorException::class])
+    fun onUpdateArticleUseCaseErrorException(e: UpdateArticleUseCaseErrorException): ResponseEntity<GenericErrorModel> =
+        when (val error = e.error) {
+            is UpdateArticleUseCase.Error.NotFoundArticleBySlug -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = listOf("${error.slug.value} に該当する記事は見つかりませんでした")
+                    )
+                ),
+                HttpStatus.NOT_FOUND
+            )
+
+            is UpdateArticleUseCase.Error.InvalidArticle -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = error.errors.map { it.message }
+                    )
+                ),
+                HttpStatus.FORBIDDEN
+            )
+
+            is UpdateArticleUseCase.Error.ValidationErrors -> ResponseEntity(
+                GenericErrorModel(
+                    errors = GenericErrorModelErrors(
+                        body = error.errors.map { it.message }
+                    )
+                ),
+                HttpStatus.FORBIDDEN
+            )
+        }
 }
