@@ -9,6 +9,7 @@ import com.example.implementingserversidekotlindevelopment.domain.CreatedArticle
 import com.example.implementingserversidekotlindevelopment.domain.Description
 import com.example.implementingserversidekotlindevelopment.domain.Slug
 import com.example.implementingserversidekotlindevelopment.domain.Title
+import com.example.implementingserversidekotlindevelopment.domain.UpdatableCreatedArticle
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
@@ -97,5 +98,65 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
                 Body.newWithoutValidation(it["body"].toString())
             )
         }.right()
+    }
+
+    override fun update(
+        slug: Slug,
+        updatableCreatedArticle: UpdatableCreatedArticle,
+    ): Either<ArticleRepository.UpdateError, CreatedArticle> {
+        /**
+         * slug に該当する作成済記事を調べる
+         */
+        val findArticleSql = """
+            SELECT
+                articles.slug
+                , articles.title
+                , articles.body
+                , articles.description
+            FROM
+                articles
+            WHERE
+                slug = :slug
+        """.trimIndent()
+        val articleMapList =
+            namedParameterJdbcTemplate.queryForList(
+                findArticleSql,
+                MapSqlParameterSource().addValue("slug", slug.value)
+            )
+
+        /**
+         * DB から作成済記事が見つからなかった場合、早期 return
+         */
+        if (articleMapList.isEmpty()) {
+            return ArticleRepository.UpdateError.NotFound(slug = slug).left()
+        }
+
+        /**
+         * 記事を更新
+         */
+        val sql = """
+            UPDATE
+                articles
+            SET
+                title = :title
+                , body = :body
+                , description = :description
+            WHERE
+                slug = :slug
+        """.trimIndent()
+        namedParameterJdbcTemplate.update(
+            sql,
+            MapSqlParameterSource()
+                .addValue("slug", slug.value)
+                .addValue("title", updatableCreatedArticle.title.value)
+                .addValue("body", updatableCreatedArticle.body.value)
+                .addValue("description", updatableCreatedArticle.description.value)
+        )
+        return CreatedArticle.newWithoutValidation(
+            slug = slug,
+            title = updatableCreatedArticle.title,
+            body = updatableCreatedArticle.body,
+            description = updatableCreatedArticle.description
+        ).right()
     }
 }
