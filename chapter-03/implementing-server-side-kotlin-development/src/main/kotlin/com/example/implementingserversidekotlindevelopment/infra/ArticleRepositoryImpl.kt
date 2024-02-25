@@ -23,7 +23,7 @@ import org.springframework.stereotype.Repository
 class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTemplate) : ArticleRepository {
     override fun findBySlug(slug: Slug): Either<ArticleRepository.FindBySlugError, CreatedArticle> {
         val sql = """
-            SELECT 
+            SELECT
                 articles.slug
                 , articles.title
                 , articles.body
@@ -33,8 +33,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
             WHERE
                 slug = :slug
         """.trimIndent()
-        val articleMapList =
-            namedParameterJdbcTemplate.queryForList(sql, MapSqlParameterSource().addValue("slug", slug.value))
+        val articleMapList = namedParameterJdbcTemplate.queryForList(sql, MapSqlParameterSource().addValue("slug", slug.value))
 
         /**
          * DB から作成済記事が見つからなかった場合、早期 return
@@ -66,7 +65,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
                 , :title
                 , :body
                 , :description
-               )
+            )
         """.trimIndent()
         namedParameterJdbcTemplate.update(
             sql,
@@ -96,7 +95,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
                 Slug.newWithoutValidation(it["slug"].toString()),
                 Title.newWithoutValidation(it["title"].toString()),
                 Description.newWithoutValidation(it["description"].toString()),
-                Body.newWithoutValidation(it["body"].toString()),
+                Body.newWithoutValidation(it["body"].toString())
             )
         }.right()
     }
@@ -175,6 +174,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
                 articles
             WHERE
                 slug = :slug
+            ;
         """.trimIndent()
         val articleMapList =
             namedParameterJdbcTemplate.queryForList(
@@ -197,6 +197,7 @@ class ArticleRepositoryImpl(val namedParameterJdbcTemplate: NamedParameterJdbcTe
                 articles
             WHERE
                 slug = :slug
+            ;
         """.trimIndent()
         namedParameterJdbcTemplate.update(
             sql,

@@ -1,8 +1,7 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import arrow.core.Invalid
-import arrow.core.Valid
-import arrow.core.invalidNel
+import arrow.core.Either
+import arrow.core.leftNel
 import net.jqwik.api.Arbitraries
 import net.jqwik.api.Arbitrary
 import net.jqwik.api.ArbitrarySupplier
@@ -34,13 +33,13 @@ class TitleTest {
              */
             val expected = Title.newWithoutValidation(validString)
             when (actual) {
-                is Invalid -> assert(false) { "原因: ${actual.value}" }
-                is Valid -> assertThat(actual.value.value).isEqualTo(expected.value)
+                is Either.Left -> assert(false) { "原因: ${actual.value}" }
+                is Either.Right -> assertThat(actual.value.value).isEqualTo(expected.value)
             }
         }
 
         @Property
-        fun `準正常系-長さが長すぎる場合、バリデーションエラーが戻り値`(
+        fun `異常系-長さが長すぎる場合、バリデーションエラーが戻り値`(
             @ForAll @NotBlank @StringLength(min = 33) tooLongString: String,
         ) {
             /**
@@ -56,54 +55,50 @@ class TitleTest {
             /**
              * then:
              */
-            val expected = Title.CreationError.TooLong(maximumLength).invalidNel()
+            val expected = Title.CreationError.TooLong(maximumLength).leftNel()
             assertThat(actual).isEqualTo(expected)
         }
 
         @Test
-        fun `準正常系-null の場合、バリデーションエラーが戻り値`() {
+        fun `異常系-空文字列の場合、バリデーションエラーが戻り値`() {
             /**
              * given:
              */
-            val nullString = null
+            val emptyString = ""
 
             /**
              * when:
              */
-            val actual = Title.new(nullString)
+            val actual = Title.new(emptyString)
 
             /**
              * then:
              */
-            val expected = Title.CreationError.Required.invalidNel()
+            val expected = Title.CreationError.Required.leftNel()
             assertThat(actual).isEqualTo(expected)
         }
 
         @Test
-        fun `準正常系-空白の場合、バリデーションエラーが戻り値`() {
+        fun `異常系-空白の場合、バリデーションエラーが戻り値`() {
             /**
              * given:
              */
-            val nullString = " "
+            val blankString = "  "
 
             /**
              * when:
              */
-            val actual = Title.new(nullString)
+            val actual = Title.new(blankString)
 
             /**
              * then:
              */
-            val expected = Title.CreationError.Required.invalidNel()
+            val expected = Title.CreationError.Required.leftNel()
             assertThat(actual).isEqualTo(expected)
         }
     }
 
     class TitleValidRange : ArbitrarySupplier<String> {
-        override fun get(): Arbitrary<String> =
-            Arbitraries.strings()
-                .ofMinLength(1)
-                .ofMaxLength(32)
-                .filter { it.isNotBlank() }
+        override fun get(): Arbitrary<String> = Arbitraries.strings().ofMinLength(1).ofMaxLength(32).filter { it.isNotBlank() }
     }
 }

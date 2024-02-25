@@ -1,8 +1,7 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import arrow.core.Invalid
-import arrow.core.Valid
-import arrow.core.invalidNel
+import arrow.core.Either
+import arrow.core.leftNel
 import net.jqwik.api.Arbitraries
 import net.jqwik.api.Arbitrary
 import net.jqwik.api.ArbitrarySupplier
@@ -11,7 +10,6 @@ import net.jqwik.api.From
 import net.jqwik.api.Property
 import net.jqwik.api.constraints.StringLength
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
 
 class DescriptionTest {
     class New {
@@ -31,9 +29,10 @@ class DescriptionTest {
             /**
              * then:
              */
+            val expected = Description.newWithoutValidation(validString)
             when (actual) {
-                is Invalid -> assert(false) { "原因: ${actual.value}" }
-                is Valid -> assertThat(actual.value.value).isEqualTo(validString)
+                is Either.Left -> assert(false) { "原因: ${actual.value}" }
+                is Either.Right -> assertThat(actual.value.value).isEqualTo(expected.value)
             }
         }
 
@@ -54,26 +53,7 @@ class DescriptionTest {
             /**
              * then:
              */
-            val expected = Description.CreationError.TooLong(maximumLength).invalidNel()
-            assertThat(actual).isEqualTo(expected)
-        }
-
-        @Test
-        fun `異常系-null の場合、バリデーションエラーが戻り値`() {
-            /**
-             * given:
-             */
-            val nullString = null
-
-            /**
-             * when:
-             */
-            val actual = Description.new(nullString)
-
-            /**
-             * then:
-             */
-            val expected = Description.CreationError.Required.invalidNel()
+            val expected = Description.CreationError.TooLong(maximumLength).leftNel()
             assertThat(actual).isEqualTo(expected)
         }
     }
@@ -88,6 +68,5 @@ class DescriptionTest {
                 .strings()
                 .ofMinLength(0)
                 .ofMaxLength(64)
-                .filter { !it.startsWith("diff-") }
     }
 }

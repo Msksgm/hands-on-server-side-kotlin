@@ -1,8 +1,8 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import arrow.core.ValidatedNel
-import arrow.core.invalidNel
-import arrow.core.validNel
+import arrow.core.EitherNel
+import arrow.core.leftNel
+import arrow.core.right
 import com.example.implementingserversidekotlindevelopment.util.ValidationError
 
 /**
@@ -43,26 +43,17 @@ interface Description {
          * @param description
          * @return
          */
-        fun new(description: String?): ValidatedNel<CreationError, Description> {
-            /**
-             * null チェック
-             *
-             * 空白だった場合、早期リターン
-             */
-            if (description == null) {
-                return CreationError.Required.invalidNel()
-            }
-
+        fun new(description: String): EitherNel<CreationError, Description> {
             /**
              * 文字数チェック
              *
              * 最大文字数より長かったら、早期リターン
              */
             if (description.length > maximumLength) {
-                return CreationError.TooLong(maximumLength).invalidNel()
+                return CreationError.TooLong(maximumLength).leftNel()
             }
 
-            return ValidatedDescription(description).validNel()
+            return ValidatedDescription(description).right()
         }
 
         /**
@@ -79,18 +70,6 @@ interface Description {
      *
      */
     sealed interface CreationError : ValidationError {
-        /**
-         * 必須
-         *
-         * Null は許容しない
-         *
-         * @constructor Create empty Required
-         */
-        object Required : CreationError {
-            override val message: String
-                get() = "description を入力してください"
-        }
-
         /**
          * 文字数制限
          *

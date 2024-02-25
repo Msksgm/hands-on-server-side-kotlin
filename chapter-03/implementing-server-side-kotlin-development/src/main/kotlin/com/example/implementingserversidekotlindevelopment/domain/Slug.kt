@@ -1,10 +1,10 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import arrow.core.ValidatedNel
-import arrow.core.invalidNel
-import arrow.core.validNel
+import arrow.core.EitherNel
+import arrow.core.leftNel
+import arrow.core.right
 import com.example.implementingserversidekotlindevelopment.util.ValidationError
-import java.util.*
+import java.util.UUID
 
 /**
  * 作成済記事の Slug
@@ -47,25 +47,17 @@ interface Slug {
          * @param slug
          * @return
          */
-        fun new(slug: String?): ValidatedNel<CreationError, Slug> {
-            /**
-             * Null チェック
-             *
-             * 空白だった場合、早期リターン
-             */
-            if (slug == null) {
-                return CreationError.Required.invalidNel()
-            }
-
+        fun new(slug: String): EitherNel<CreationError, Slug> {
             /**
              * format チェック
              *
              * format が適切でなかったら、早期リターン
              */
             if (!slug.matches(Regex(format))) {
-                return CreationError.ValidFormat(slug).invalidNel()
+                return CreationError.ValidFormat(slug).leftNel()
             }
-            return ValidatedSlug(slug).validNel()
+
+            return ValidatedSlug(slug).right()
         }
 
         /**
@@ -83,18 +75,6 @@ interface Slug {
      *
      */
     sealed interface CreationError : ValidationError {
-        /**
-         * 必須
-         *
-         * Null は許容しない
-         *
-         * @constructor Create empty Required
-         */
-        object Required : CreationError {
-            override val message: String
-                get() = "slug は必須です"
-        }
-
         /**
          * フォーマット確認
          *

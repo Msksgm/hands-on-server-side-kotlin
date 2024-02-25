@@ -1,8 +1,8 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import arrow.core.ValidatedNel
-import arrow.core.invalidNel
-import arrow.core.validNel
+import arrow.core.EitherNel
+import arrow.core.leftNel
+import arrow.core.right
 import com.example.implementingserversidekotlindevelopment.util.ValidationError
 
 /**
@@ -50,14 +50,14 @@ interface Title {
          * @param title
          * @return
          */
-        fun new(title: String?): ValidatedNel<CreationError, Title> {
+        fun new(title: String): EitherNel<CreationError, Title> {
             /**
-             * null、空白チェック
+             * 空白チェック
              *
              * 空白だった場合、早期リターン
              */
-            if (title.isNullOrBlank()) {
-                return CreationError.Required.invalidNel()
+            if (title.isBlank()) {
+                return CreationError.Required.leftNel()
             }
 
             /**
@@ -66,9 +66,10 @@ interface Title {
              * 最大文字数より長かったら、早期リターン
              */
             if (title.length > maximumLength) {
-                return CreationError.TooLong(maximumLength).invalidNel()
+                return CreationError.TooLong(maximumLength).leftNel()
             }
-            return ValidatedTitle(title).validNel()
+
+            return ValidatedTitle(title).right()
         }
     }
 
@@ -80,7 +81,7 @@ interface Title {
         /**
          * 必須
          *
-         * Null は許容しない
+         * 空文字列や空白を許容しない
          *
          * @constructor Create empty Required
          */

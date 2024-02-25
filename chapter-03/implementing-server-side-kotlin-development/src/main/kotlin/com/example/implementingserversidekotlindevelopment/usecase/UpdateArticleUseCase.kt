@@ -1,6 +1,7 @@
 package com.example.implementingserversidekotlindevelopment.usecase
 
 import arrow.core.Either
+import arrow.core.getOrElse
 import arrow.core.left
 import arrow.core.right
 import com.example.implementingserversidekotlindevelopment.domain.ArticleRepository
@@ -23,8 +24,7 @@ interface UpdateArticleUseCase {
      * @param body
      * @return
      */
-    fun execute(slug: String?, title: String?, description: String?, body: String?): Either<Error, CreatedArticle> =
-        throw NotImplementedError()
+    fun execute(slug: String, title: String, description: String, body: String): Either<Error, CreatedArticle> = throw NotImplementedError()
 
     /**
      * 記事更新ユースケースのエラー
@@ -61,39 +61,26 @@ interface UpdateArticleUseCase {
  */
 @Service
 class UpdateArticleUseCaseImpl(val articleRepository: ArticleRepository) : UpdateArticleUseCase {
-    override fun execute(
-        slug: String?,
-        title: String?,
-        description: String?,
-        body: String?,
-    ): Either<UpdateArticleUseCase.Error, CreatedArticle> {
+    override fun execute(slug: String, title: String, description: String, body: String): Either<UpdateArticleUseCase.Error, CreatedArticle> {
         /**
          * slug のバリデーション
          *
          * 不正だった場合、早期 return
          */
-        val validatedSlug = Slug.new(slug).fold(
-            { return UpdateArticleUseCase.Error.ValidationErrors(it.all).left() },
-            { it }
-        )
+        val validatedSlug = Slug.new(slug).getOrElse { return UpdateArticleUseCase.Error.ValidationErrors(it).left() }
 
         /**
          * 更新用作成済記事の生成
          *
          * 不正だった場合、早期 return
          */
-        val unsavedCreatedArticle = UpdatableCreatedArticle.new(title, description, body).fold(
-            { return UpdateArticleUseCase.Error.InvalidArticle(it).left() },
-            { it }
-        )
+        val unsavedUpdatableArticle = UpdatableCreatedArticle.new(title, description, body).getOrElse { return UpdateArticleUseCase.Error.ValidationErrors(it).left() }
 
         /**
          * 作成済記事の更新
          */
-        val createdArticle = articleRepository.update(validatedSlug, unsavedCreatedArticle).fold(
-            { return UpdateArticleUseCase.Error.NotFoundArticleBySlug(validatedSlug).left() },
-            { it }
-        )
+        val createdArticle = articleRepository.update(validatedSlug, unsavedUpdatableArticle).getOrElse { return UpdateArticleUseCase.Error.NotFoundArticleBySlug(validatedSlug).left() }
+
         return createdArticle.right()
     }
 }

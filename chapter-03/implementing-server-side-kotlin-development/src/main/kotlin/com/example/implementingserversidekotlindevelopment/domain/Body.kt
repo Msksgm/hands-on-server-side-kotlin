@@ -1,8 +1,8 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import arrow.core.ValidatedNel
-import arrow.core.invalidNel
-import arrow.core.validNel
+import arrow.core.EitherNel
+import arrow.core.leftNel
+import arrow.core.right
 import com.example.implementingserversidekotlindevelopment.util.ValidationError
 
 /**
@@ -51,26 +51,17 @@ interface Body {
          * @param body
          * @return
          */
-        fun new(body: String?): ValidatedNel<CreationError, Body> {
-            /**
-             * null チェック
-             *
-             * 空白だった場合、早期リターン
-             */
-            if (body == null) {
-                return CreationError.Required.invalidNel()
-            }
-
+        fun new(body: String): EitherNel<CreationError, Body> {
             /**
              * 文字数チェック
              *
              * 最大文字数より長かったら、早期リターン
              */
             if (body.length > maximumLength) {
-                return CreationError.TooLong(maximumLength).invalidNel()
+                return CreationError.TooLong(maximumLength).leftNel()
             }
 
-            return ValidatedBody(body).validNel()
+            return ValidatedBody(body).right()
         }
     }
 
@@ -79,18 +70,6 @@ interface Body {
      *
      */
     sealed interface CreationError : ValidationError {
-        /**
-         * 必須
-         *
-         * Null は許容しない
-         *
-         * @constructor Create empty Required
-         */
-        object Required : CreationError {
-            override val message: String
-                get() = "body は必須です"
-        }
-
         /**
          * 文字数制限
          *

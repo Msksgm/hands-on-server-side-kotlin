@@ -1,4 +1,4 @@
-package com.example.implementingserversidekotlindevelopment.infra
+package com.example.implementingserversidekotlindevelopment.api.integration.helper
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -32,8 +32,6 @@ object DbConnection {
         return HikariDataSource(hikariConfig)
     }
 
-    val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource())
-
     /**
      * テスト時にテーブルのシーケンスを設定するメソッド
      *
@@ -41,12 +39,14 @@ object DbConnection {
      *
      */
     fun resetSequence() {
+        val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource())
         val sequenceValue = 10000
         val sql = """
             SELECT
                 setval('articles_id_seq', $sequenceValue)
             ;
         """.trimIndent()
+        // シーケンスをリセット
         namedParameterJdbcTemplate.queryForList(sql, MapSqlParameterSource())
     }
 }

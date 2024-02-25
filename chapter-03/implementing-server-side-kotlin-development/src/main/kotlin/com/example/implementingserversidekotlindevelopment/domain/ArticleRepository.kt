@@ -34,9 +34,7 @@ interface ArticleRepository {
      * @param createdArticle
      * @return
      */
-    fun create(
-        createdArticle: CreatedArticle,
-    ): Either<CreateArticleError, CreatedArticle> = throw NotImplementedError()
+    fun create(createdArticle: CreatedArticle): Either<CreateArticleError, CreatedArticle> = throw NotImplementedError()
 
     /**
      * 作成済記事を保存したときのエラー
@@ -65,8 +63,7 @@ interface ArticleRepository {
      * @param updatableCreatedArticle
      * @return
      */
-    fun update(slug: Slug, updatableCreatedArticle: UpdatableCreatedArticle): Either<UpdateError, CreatedArticle> =
-        throw NotImplementedError()
+    fun update(slug: Slug, updatableCreatedArticle: UpdatableCreatedArticle): Either<UpdateError, CreatedArticle> = throw NotImplementedError()
 
     /**
      * ArticleRepository.update のエラーインタフェース

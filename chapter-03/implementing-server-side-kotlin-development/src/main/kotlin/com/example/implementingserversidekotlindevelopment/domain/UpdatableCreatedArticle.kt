@@ -1,7 +1,8 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import arrow.core.ValidatedNel
-import arrow.core.zip
+import arrow.core.EitherNel
+import arrow.core.raise.either
+import arrow.core.raise.zipOrAccumulate
 import com.example.implementingserversidekotlindevelopment.util.ValidationError
 
 /**
@@ -47,14 +48,23 @@ interface UpdatableCreatedArticle {
          * @return
          */
         fun new(
-            title: String?,
-            description: String?,
-            body: String?,
-        ): ValidatedNel<ValidationError, UpdatableCreatedArticle> {
-            return Title.new(title).zip(
-                Description.new(description),
-                Body.new(body)
-            ) { a, b, c -> ValidatedUpdatableCreatedArticle(a, b, c) }
+            title: String,
+            description: String,
+            body: String,
+        ): EitherNel<ValidationError, UpdatableCreatedArticle> {
+            return either {
+                zipOrAccumulate(
+                    { Title.new(title).bindNel() },
+                    { Description.new(description).bindNel() },
+                    { Body.new(body).bindNel() },
+                ) { validatedTitle, validatedDescription, validatedBody ->
+                    ValidatedUpdatableCreatedArticle(
+                        validatedTitle,
+                        validatedDescription,
+                        validatedBody
+                    )
+                }
+            }
         }
     }
 }

@@ -1,8 +1,7 @@
 package com.example.implementingserversidekotlindevelopment.domain
 
-import arrow.core.Invalid
-import arrow.core.Valid
-import arrow.core.invalidNel
+import arrow.core.Either
+import arrow.core.leftNel
 import net.jqwik.api.Arbitraries
 import net.jqwik.api.Arbitrary
 import net.jqwik.api.ArbitrarySupplier
@@ -30,9 +29,10 @@ class SlugTest {
             /**
              * then:
              */
+            val expectedSlug = Slug.newWithoutValidation(validString)
             when (actual) {
-                is Invalid -> assert(false) { "原因: ${actual.value}" }
-                is Valid -> assertThat(actual.value.value).isEqualTo(validString)
+                is Either.Left -> assert(false) { "原因: ${actual.value}" }
+                is Either.Right -> assertThat(actual.value.value).isEqualTo(expectedSlug.value)
             }
         }
 
@@ -52,26 +52,7 @@ class SlugTest {
             /**
              * then:
              */
-            val expected = Slug.CreationError.ValidFormat(invalidString).invalidNel()
-            assertThat(actual).isEqualTo(expected)
-        }
-
-        @Test
-        fun `異常系-null の場合、バリデーションエラーが戻り値`() {
-            /**
-             * given:
-             */
-            val nullString = null
-
-            /**
-             * when:
-             */
-            val actual = Slug.new(nullString)
-
-            /**
-             * then:
-             */
-            val expected = Slug.CreationError.Required.invalidNel()
+            val expected = Slug.CreationError.ValidFormat(invalidString).leftNel()
             assertThat(actual).isEqualTo(expected)
         }
 

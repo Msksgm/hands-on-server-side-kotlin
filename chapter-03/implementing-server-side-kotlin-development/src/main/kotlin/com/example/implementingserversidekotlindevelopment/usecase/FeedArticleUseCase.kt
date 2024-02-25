@@ -1,6 +1,7 @@
 package com.example.implementingserversidekotlindevelopment.usecase
 
 import arrow.core.Either
+import arrow.core.getOrElse
 import arrow.core.right
 import com.example.implementingserversidekotlindevelopment.domain.ArticleRepository
 import com.example.implementingserversidekotlindevelopment.domain.CreatedArticle
@@ -49,10 +50,7 @@ class FeedArticleUseCaseImpl(val articleRepository: ArticleRepository) : FeedArt
         /**
          * 記事を全て取得する
          */
-        val createdArticles = articleRepository.all().fold(
-            { throw UnsupportedOperationException("想定外のエラー") },
-            { it }
-        )
+        val createdArticles = articleRepository.all().getOrElse { throw UnsupportedOperationException("想定外のエラー") }
 
         return FeedArticleUseCase.FeedCreatedArticles(
             articles = createdArticles,
