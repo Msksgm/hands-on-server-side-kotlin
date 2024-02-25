@@ -170,12 +170,17 @@ class ArticleTest {
         }
 
         @Test
-        fun `異常系-slug が 32 文字でない場合、バリデーションエラー`() {
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-バリデーションエラー slug が 33 文字以上`() {
             /**
              * given:
-             * - 不正なフォーマットの slug
+             * - 33 文字（33 文字以上）の slug
              */
-            val slug = "dummy-slug"
+            val slug = "a".repeat(33)
 
             /**
              * when:
@@ -205,7 +210,52 @@ class ArticleTest {
             JSONAssert.assertEquals(
                 expectedResponseBody,
                 actualResponseBody,
-                JSONCompareMode.NON_EXTENSIBLE
+                JSONCompareMode.NON_EXTENSIBLE,
+            )
+        }
+
+        @Test
+        @DataSet(
+            value = [
+                "datasets/yml/given/empty-articles.yml"
+            ]
+        )
+        fun `異常系-バリデーションエラー slug が 31 文字以下`() {
+            /**
+             * given:
+             * - 31 文字（31 文字以下）の slug
+             */
+            val slug = "a".repeat(31)
+
+            /**
+             * when:
+             */
+            val response = mockMvc.delete("/api/articles/$slug") {
+                contentType = MediaType.APPLICATION_JSON
+            }.andReturn().response
+            val actualStatus = response.status
+            val actualResponseBody = response.contentAsString
+
+            /**
+             * then:
+             * - ステータスコードが一致する
+             * - レスポンスボディが一致する
+             */
+            val expectedStatus = HttpStatus.BAD_REQUEST.value()
+            val expectedResponseBody = """
+                {
+                    "errors": {
+                        "body": [
+                            "slugは32文字以上32文字以下にしてください"
+                        ]
+                    }
+                }
+            """.trimIndent()
+            assertThat(actualStatus).isEqualTo(expectedStatus)
+            JSONAssert.assertEquals(
+                expectedResponseBody,
+                actualResponseBody,
+                JSONCompareMode.NON_EXTENSIBLE,
             )
         }
     }
@@ -1002,7 +1052,6 @@ class ArticleTest {
                 JSONCompareMode.NON_EXTENSIBLE,
             )
         }
-
 
         @Test
         @DataSet(
