@@ -1,5 +1,5 @@
 CREATE TABLE public.articles (
-                                 id serial NOT NULL
+    id serial NOT NULL
     , title character varying NOT NULL
     , slug character varying NOT NULL
     , body text NOT NULL
