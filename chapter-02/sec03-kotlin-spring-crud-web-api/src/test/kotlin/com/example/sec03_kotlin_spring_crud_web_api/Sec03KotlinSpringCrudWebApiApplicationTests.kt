@@ -1,4 +1,4 @@
-package com.example.sec03kotlinspringcrudwebapi
+package com.example.sec03_kotlin_spring_crud_web_api
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName

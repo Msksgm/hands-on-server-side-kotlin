@@ -1,4 +1,4 @@
-package com.example.sec03kotlinspringcrudwebapi
+package com.example.sec03_kotlin_spring_crud_web_api
 
 import org.springframework.stereotype.Service
 
@@ -44,7 +44,7 @@ interface CustomerService {
  *  - @ServiceもDIするためのアノテーションで、インターフェースをDIする場合は@Componentか@Repository アノテーションを実装する
  */
 @Service
-class CustomerServiceImpl(val customerRepository: CustomerRepository): CustomerService{
+class CustomerServiceImpl(val customerRepository: CustomerRepository): CustomerService {
     override fun insertCustomer(firstName: String, lastName: String) {
         customerRepository.add(firstName,lastName)
         return

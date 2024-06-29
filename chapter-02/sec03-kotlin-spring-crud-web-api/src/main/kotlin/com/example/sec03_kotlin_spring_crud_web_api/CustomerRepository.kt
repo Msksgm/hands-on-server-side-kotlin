@@ -1,4 +1,4 @@
-package com.example.sec03kotlinspringcrudwebapi
+package com.example.sec03_kotlin_spring_crud_web_api
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
  */
 interface CustomerRepository {
     /**
-     * Custmer テーブルにデータを挿入するメソッド
+     * Customer テーブルにデータを挿入するメソッド
      *
      * @param firstName
      * @param lastName
