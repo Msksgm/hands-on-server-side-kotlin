@@ -1,4 +1,4 @@
-package com.example.sec02springhelloworld
+package com.example.sec02_spring_helloworld
 
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
