@@ -1,11 +1,11 @@
-package com.example.sec02springhelloworld
+package com.example.sec03_kotlin_spring_crud_web_api
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class Sec02SpringHelloworldApplication
+class Sec03KotlinSpringCrudWebApiApplication
 
 fun main(args: Array<String>) {
-	runApplication<Sec02SpringHelloworldApplication>(*args)
+	runApplication<Sec03KotlinSpringCrudWebApiApplication>(*args)
 }

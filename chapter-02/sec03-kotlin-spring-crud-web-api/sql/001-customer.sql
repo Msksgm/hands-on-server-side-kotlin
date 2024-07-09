@@ -9,4 +9,6 @@ CREATE TABLE IF NOT EXISTS customer (
 INSERT INTO
     customer(first_name, last_name)
 VALUES
-    ('Alice', 'Sample1'), ('Bob', 'Sample2');
+    ('Alice', 'Sample1')
+    , ('Bob', 'Sample2')
+;
